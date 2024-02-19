@@ -10,12 +10,12 @@ public interface RequestInterface {
    *
    * @return the floor number where the request is.
    */
-  public int getStartFloor();
+  int getStartFloor();
 
   /**
    * This is the place where the elevator should go to drop off the request.
    *
    * @return the floor number where the request is.
    */
-  public int getEndFloor();
+  int getEndFloor();
 }

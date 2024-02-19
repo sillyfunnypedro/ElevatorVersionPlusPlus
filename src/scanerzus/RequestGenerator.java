@@ -17,6 +17,8 @@ public class RequestGenerator {
 
   /**
    * the getter for numFloors.
+   *
+   * @return the number of floors in the building
    */
   public int getNumFloors() {
     return numFloors;
