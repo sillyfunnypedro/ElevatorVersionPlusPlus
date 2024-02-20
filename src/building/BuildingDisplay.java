@@ -11,7 +11,7 @@ public class BuildingDisplay {
   /**
    * The constructor for the building display.
    *
-   * @param numFloors the number of floors in the building
+   * @param elevators the elevators in the building.
    */
 
   public void display(Elevator[] elevators) {
