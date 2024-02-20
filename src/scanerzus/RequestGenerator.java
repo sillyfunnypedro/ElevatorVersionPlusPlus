@@ -47,10 +47,8 @@ public class RequestGenerator {
    * @param startFloor the floor the request is generated on
    * @return the request
    */
-  public Request generateUpRequest(int startFloor) {
-    if (startFloor == this.numFloors - 1) {
-      return null;
-    }
+  public Request generateUpRequest() {
+    int startFloor = (int) (Math.random() * (this.numFloors - 1));
 
     // Get a random number between 1 and the number of floors left
     int increment = (int) (Math.random() * (this.numFloors - startFloor - 1)) + 1;
@@ -67,7 +65,8 @@ public class RequestGenerator {
    * @param startFloor the floor the request is generated on
    * @return the request
    */
-  public Request generateDownRequest(int startFloor) {
+  public Request generateDownRequest() {
+    int startFloor = (int) (Math.random() * (this.numFloors - 1)) + 1;
     if (startFloor == 0) {
       return null;
     }

@@ -1,6 +1,8 @@
 package building;
 
 import elevator.Elevator;
+import scanerzus.Request;
+import scanerzus.RequestGenerator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +15,8 @@ public class Building implements BuildingInterface {
   private final int numberOfFloors;
   private final int numberOfElevators;
 
+  private final RequestGenerator requestGenerator;
+
   private int elevatorCapacity = 30;
 
   private final Elevator[] elevators;
@@ -20,6 +24,7 @@ public class Building implements BuildingInterface {
   private final JFrame displayFrame = null;
 
   private final int sliderWidth = 95;
+
 
   /**
    * Constructs a Building object and initializes it to the given number of floors and elevators.
@@ -51,6 +56,9 @@ public class Building implements BuildingInterface {
     this.numberOfElevators = numberOfElevators;
     this.elevatorCapacity = elevatorCapacity;
 
+    // Initialize the RequestGenerator
+    this.requestGenerator = new RequestGenerator(numberOfFloors);
+
     // Initialize the Elevators in the building
     this.elevators = new Elevator[numberOfElevators];
 
@@ -58,8 +66,17 @@ public class Building implements BuildingInterface {
       this.elevators[i] = new Elevator(numberOfFloors, this.elevatorCapacity);
     }
 
-    this.initializeDisplay();
+    BuildingDisplay display = new BuildingDisplay(this.elevators,
+        this.makeStepRunnable(),
+        this.makeRunRunnable(),
+        this.makeStopRunnable(),
+        this.makeResetRunnable(),
+        this.makeRandomRequestRunnable(),
+        this.makeRandomUpRequestRunnable(),
+        this.makeRandomDownRequestRunnable());
 
+
+    display.initializeDisplay();
   }
 
   /**
@@ -90,118 +107,161 @@ public class Building implements BuildingInterface {
         + '}';
   }
 
+
   /**
-   * This method is used to initialize the display for the building.
+   * returns a Runnable that will call step() on the building.
+   *
+   * @return a Runnable that will call step() on the building.
    */
-  private void initializeDisplay1() {
-    // Create the display frame
-    JFrame displayFrame = new JFrame("Elevator Display");
-    displayFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    displayFrame.setSize(1200, 600);
+  public Runnable makeStepRunnable() {
+    return new Runnable() {
+      public void run() {
+        step();
+      }
+    };
 
-    JPanel panel = new JPanel();
-    panel.setBounds(200, 0, 800, 400);
-    panel.setBackground(Color.gray);
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    // Put a border around the panel
-    //panel.setBorder(BorderFactory.createLineBorder(new Color(0), 2, true));
-
-//    // add the elevator display
-//    for (Elevator elevator : elevators) {
-//      JPanel display = elevator.getDisplay();
-//      panel.add(display);
-//    }
-
-
-    displayFrame.add(panel);
-    displayFrame.setVisible(true);
-
-  }
-
-  private void initializeDisplay3() {
-    // Create the display frame
-    JFrame displayFrame = new JFrame("Elevator Display");
-    displayFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    displayFrame.setSize(1200, 600);
-    displayFrame.setBackground(Color.white); // set the frame background to white
-
-    JPanel panel = new JPanel();
-    panel.setPreferredSize(new Dimension(800, 400)); // set the preferred size of the panel
-    panel.setBackground(Color.gray);
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    // Put a border around the panel
-    //panel.setBorder(BorderFactory.createLineBorder(new Color(0), 2, true));
-
-//    // add the elevator display
-//    for (Elevator elevator : elevators) {
-//      JPanel display = elevator.getDisplay();
-//      panel.add(display);
-//    }
-
-
-    displayFrame.add(panel);
-    displayFrame.setVisible(true);
-
-  }
-
-  public void initializeDisplay() {
-
-
-    JFrame f = new JFrame("Building Manager");
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    // set up the logo panel
-    JPanel logoPanel = new JPanel();
-    logoPanel.setBounds(0, 0, 200, 200);
-    // set the image to the jpg file
-    ImageIcon logo = new ImageIcon("resources/UPnDOWN.jpeg");
-    // scale the image to fit the label
-    Image scaledImage = logo.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-    ImageIcon scaledLogo = new ImageIcon(scaledImage);
-
-    // create a label with the image
-    JLabel logoLabel = new JLabel(scaledLogo);
-    logoLabel.setSize(200, 200);
-    // add the label to the logoPanel.
-    logoPanel.add(logoLabel, BorderLayout.CENTER);
-
-    f.add(logoPanel);
-
-    JComponent panel = this.generateElevatorPanel();
-    f.add(panel);
-    f.setSize(200 // left margin
-            + 10 // right margin
-            + (elevators.length) * sliderWidth, // the sliders
-        500);
-    f.setLayout(null);
-    f.setVisible(true);
   }
 
   /**
-   * This generates the title for the elevator display.
+   * This method is used to step the building.
    */
-  private JComponent generateTitle() {
-    JLabel label = new JLabel("The Control Center");
-    label.setFont(new Font("Courier", Font.BOLD, 20));
-    return label;
-  }
-
-  /**
-   * This generates the panel of all of the elevators.
-   */
-  private JComponent generateElevatorPanel() {
-    JPanel panel = new JPanel();
-    panel.setBounds(200, 40, sliderWidth * elevators.length, 220);
-    panel.setBackground(Color.gray);
-
-    // add the elevator display
+  private void step() {
+    System.out.println("Stepping the building");
     for (Elevator elevator : elevators) {
-      JComponent display = elevator.getDisplay();
-      panel.add(display);
+      elevator.step();
     }
+  }
 
-    return panel;
+  /**
+   * returns a Runnable that will call stop() on the building.
+   *
+   * @return a Runnable that will call stop() on the building.
+   */
+  public Runnable makeStopRunnable() {
+    return new Runnable() {
+      public void run() {
+        stop();
+      }
+    };
+  }
+
+  /**
+   * This method is used to stop the building.
+   */
+  private void stop() {
+    System.out.println("Stopping the building");
+  }
+
+  /**
+   * returns a Runnable that will call run() on the building.
+   *
+   * @return a Runnable that will call run() on the building.
+   */
+  public Runnable makeRunRunnable() {
+    return new Runnable() {
+      public void run() {
+        runBuilding();
+      }
+    };
+  }
+
+  /**
+   * This method is used to run the building.
+   */
+  private void runBuilding() {
+    System.out.println("Running the building");
+  }
+
+
+  /**
+   * returns a Runnable that will call reset() on the building.
+   *
+   * @return a Runnable that will call reset() on the building.
+   */
+  public Runnable makeResetRunnable() {
+    return new Runnable() {
+      public void run() {
+        resetBuilding();
+      }
+    };
+  }
+
+
+  /**
+   * This method is used to reset the building.
+   */
+  private void resetBuilding() {
+    System.out.println("Resetting the building");
+  }
+
+
+  /**
+   * returns a runnable that will get a random request for the building.
+   *
+   * @return a runnable that will get a random request for the building.
+   */
+  public Runnable makeRandomRequestRunnable() {
+    return new Runnable() {
+      public void run() {
+        randomRequest();
+      }
+    };
+  }
+
+  /**
+   * This method is used to get a random request for the building.
+   */
+  private void randomRequest() {
+    Request request = requestGenerator.generateRequestRandom();
+
+    System.out.println("Found a random request: " + request);
+  }
+
+  /**
+   * returns a runnable that will get a random up request for the building.
+   *
+   * @return a runnable that will get a random up request for the building.
+   */
+  public Runnable makeRandomUpRequestRunnable() {
+    return new Runnable() {
+      public void run() {
+        randomUpRequest();
+      }
+    };
+  }
+
+  /**
+   * This method is used to get a random up request for the building.
+   */
+  private void randomUpRequest() {
+    Request request = requestGenerator.generateUpRequest();
+
+    System.out.println("Found a random up request: " + request);
+  }
+
+  /**
+   * returns a runnable that will get a random down request for the building.
+   *
+   * @return a runnable that will get a random down request for the building.
+   */
+  public Runnable makeRandomDownRequestRunnable() {
+    return new Runnable() {
+      public void run() {
+        randomDownRequest();
+      }
+    };
+  }
+
+  /**
+   * This method is used to get a random down request for the building.
+   */
+  private void randomDownRequest() {
+    Request request = requestGenerator.generateDownRequest();
+
+    System.out.println("Found a random down request: " + request);
   }
 
 
 }
+
+

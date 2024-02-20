@@ -43,17 +43,10 @@ public class RequestGeneratorTest {
     System.out.println("Testing: testGetNextDownRequest");
     RequestGenerator requestGenerator = new RequestGenerator(10);
 
-    Request request = requestGenerator.generateDownRequest(0);
-    assertNull(request);
+    Request request = requestGenerator.generateDownRequest();
+    assertTrue(request.getStartFloor() > request.getEndFloor());
 
-    request = requestGenerator.generateDownRequest(1);
-    assertEquals(request.getStartFloor(), 1);
-    assertEquals(request.getEndFloor(), 0);
-    assertEquals("1->0", request.toString());
 
-    request = requestGenerator.generateDownRequest(9);
-    assertEquals(request.getStartFloor(), 9);
-    assertTrue(request.getEndFloor() <= 8);
   }
 
   /**
@@ -64,16 +57,8 @@ public class RequestGeneratorTest {
     System.out.println("Testing: testGetNextUpRequest");
     RequestGenerator requestGenerator = new RequestGenerator(10);
 
-    Request request = requestGenerator.generateUpRequest(9);
-    assertNull(request);
+    Request request = requestGenerator.generateUpRequest();
 
-    request = requestGenerator.generateUpRequest(8);
-    assertEquals(8, request.getStartFloor());
-    assertEquals(9, request.getEndFloor());
-    assertEquals("8->9", request.toString());
-
-    request = requestGenerator.generateUpRequest(0);
-    assertEquals(request.getStartFloor(), 0);
-    assertTrue(request.getEndFloor() >= 1);
+    assertTrue(request.getStartFloor() < request.getEndFloor());
   }
 }
