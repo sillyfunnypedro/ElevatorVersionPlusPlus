@@ -62,7 +62,6 @@ public class RequestGenerator {
    * Generate a down request for the elevator.
    * If the elevator is at the bottom floor then the request will be null.
    *
-   * @param startFloor the floor the request is generated on
    * @return the request
    */
   public Request generateDownRequest() {
