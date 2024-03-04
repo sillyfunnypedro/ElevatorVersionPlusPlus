@@ -1,7 +1,10 @@
 package elevator;
 
+import scanerzus.Request;
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  * An implementation of the Elevator interface.
@@ -21,25 +24,33 @@ public class Elevator implements ElevatorInterface {
    * The current floor of the elevator.
    * This is initialized to 0, which is the ground floor.
    */
-  private float currentFloor;
+  private int currentFloor;
 
   /**
    * The amount of a floor that the elevator will move each step.
    */
-  private final float floorIncrement = 0.1f; // This is set by the manufacturer.
+  private final int floorIncrement = 1; // This is set by the manufacturer.
 
   /**
    * The direction the elevator is moving.
    */
   private Direction direction;
 
+  private ArrayList<Request> upRequests;
+  private ArrayList<Request> downRequests;
+
+  private int openDoorTimer = 0;
+
+  private boolean makingRun = false;
+
+  private boolean floorRequests[]; // true if there is a request for the floor.
+
   /**
    * The state of the door
    */
   private boolean doorClosed = true;
 
-  private JSlider displaySlider = null;
-  private JLabel displayLabel = null;
+  private boolean outOfService; // start must be issued on the elevator to start it.
 
 
   /**
@@ -66,6 +77,17 @@ public class Elevator implements ElevatorInterface {
     this.maxOccupancy = maxOccupancy;
     this.currentFloor = 0;
     this.direction = Direction.STOPPED;
+    this.outOfService = true;
+    this.floorRequests = new boolean[maxFloor];
+  }
+
+  @Override
+  public void start() {
+    this.outOfService = false;
+    this.upRequests = new ArrayList<Request>();
+    this.downRequests = new ArrayList<Request>();
+    clearStopRequests();
+    this.doorClosed = true;
   }
 
   /**
@@ -74,7 +96,7 @@ public class Elevator implements ElevatorInterface {
    * @return the current floor of the elevator
    */
   @Override
-  public float getCurrentFloor() {
+  public int getCurrentFloor() {
     return this.currentFloor;
   }
 
@@ -109,128 +131,118 @@ public class Elevator implements ElevatorInterface {
     return this.direction;
   }
 
-  /**
-   * set the direction of the elevator
-   *
-   * @param direction the direction to set
-   *                  if the direction is set to up and the elevator is at the top floor
-   *                  the direction is set to STOPPED
-   *                  if the direction is set to down and the elevator is at the bottom floor
-   *                  the direction is set to STOPPED
-   *                  if the elevator is not at a floor and the request is set to STOPPED
-   *                  it throws an exception
-   * @throws IllegalStateException if the elevator is between floors
-   */
-  @Override
-  public void setDirection(Direction direction) throws IllegalStateException {
 
-    if (direction == null) {
-      throw new IllegalArgumentException("Direction cannot be null");
-    }
+  private void getStopRequests(ArrayList<Request> requests) {
+    clearStopRequests();
 
-    if (direction == this.direction) {
-      return;
+    for (Request request : requests) {
+      this.floorRequests[request.getStartFloor()] = true;
+      this.floorRequests[request.getEndFloor()] = true;
     }
-
-    if (direction == Direction.UP && this.currentFloor == this.maxFloor) {
-      this.direction = Direction.STOPPED;
-    } else if (direction == Direction.DOWN && this.currentFloor == 0) {
-      this.direction = Direction.STOPPED;
-    } else if (direction == Direction.STOPPED && this.isBetweenFloors()) {
-      throw new IllegalStateException("Elevator is between floors");
-    } else {
-      this.direction = direction;
-    }
-    this.updateDisplay();
   }
 
   /**
-   * isDoorClosed.
-   *
-   * @return true if the door is closed, false otherwise.
+   * Clear the Floor Requests.
    */
-  @Override
-  public boolean isDoorClosed() {
-    return this.doorClosed;
-  }
-
-  /**
-   * open the door.
-   */
-  @Override
-  public void openDoor() throws IllegalStateException {
-    if (this.isBetweenFloors()) {
-      throw new IllegalStateException("You cannot open the door between floors");
+  private void clearStopRequests() {
+    for (int i = 0; i < this.maxFloor; i++) {
+      this.floorRequests[i] = false;
     }
-    this.doorClosed = false;
-    this.updateDisplay();
-  }
-
-  /**
-   * close the door, no exception needs to be thrown.
-   * If the door is already closed, then nothing happens.
-   * If the door is open then we know the elevator is at a floor
-   * and the door can be closed.
-   */
-  @Override
-  public void closeDoor() {
-    this.doorClosed = true;
-    this.updateDisplay();
   }
 
 
   /**
    * The step function is called to move the elevator one step.
+   * If the elevator is moving up we will
+   * 1. check to see if there are any requests for the current floor.
+   * If there is we will open the door and set a timer for 3 steps.
+   * 2. if the door is open we will close the door after the timer expires.
+   * 3. if the door is closed we will move the elevator up one floor.
    */
   public void step() {
-    if (this.direction == Direction.STOPPED) {
+    if (this.outOfService) {
+      return;
+    }
+    // if the elevator is at floor 0 and there are no requests then stay still.
+    if (this.currentFloor == 0 && this.upRequests.isEmpty() && this.downRequests.isEmpty()) {
       return;
     }
 
-    // if the door is open we cannot move.
-    if (!this.isDoorClosed()) {
+    if (!this.makingRun) {
+      this.setupRun();
+    }
+
+    if (this.openDoorTimer > 0) {
+      this.openDoorTimer--;
+      if (this.openDoorTimer == 0) {
+        this.doorClosed = true;
+      }
       return;
     }
 
-    // we move the elevator by the floor increment.
-    // if we reach the top or bottom floor we stop.
+    // now we check to see if there is a request at this floor
+    if (this.floorRequests[this.currentFloor]) {
+      this.doorClosed = false;
+      this.openDoorTimer = 3;
+      this.floorRequests[this.currentFloor] = false;
+      return;
+    }
+
+    // if we get here we move by one floor in the direction of the elevator.
     if (this.direction == Direction.UP) {
       this.currentFloor += this.floorIncrement;
-      if (this.currentFloor > this.maxFloor - 1) {
+      if (this.currentFloor >= this.maxFloor) {
         this.currentFloor = this.maxFloor - 1;
         this.direction = Direction.STOPPED;
       }
-    } else if (this.direction == Direction.DOWN) {
+    } else {
       this.currentFloor -= this.floorIncrement;
-      if (this.currentFloor <= 0) {
+      if (this.currentFloor < 0) {
         this.currentFloor = 0;
         this.direction = Direction.STOPPED;
       }
     }
 
-    // Just to make sure that we are not adding a floating point error.
-    // when we hit a floor we set the current floor to the floor.
-    if (Math.abs(this.currentFloor - Math.round(this.currentFloor)) < 0.01) {
-      this.currentFloor = Math.round(this.currentFloor);
+  }
+
+  private void setupRun() {
+    // if both queues are empty then we are done.
+    if (this.upRequests.isEmpty() && this.downRequests.isEmpty()) {
+      this.makingRun = false;
+      return;
     }
 
-    this.updateDisplay();
+    // if we are at the bottom floor we need to go up.
+    // and we need to add the final floor to the stop requests.
+    if (this.currentFloor == 0) {
+      this.direction = Direction.UP;
+      this.getStopRequests(this.upRequests);
+      this.floorRequests[this.maxFloor - 1] = true;
+      this.makingRun = true;
+      return;
+    }
+
+    // if we are at the top floor we need to go down.
+    // and we need to add the ground floor to the stop requests.
+    this.direction = Direction.DOWN;
+    this.getStopRequests(this.downRequests);
+    this.floorRequests[0] = true;
+
   }
 
 
-  /**
-   * Is the elevator at a floor?
-   * We store the elevator as a float so we need to check to see if the floor is
-   * within 0e-5 of an integer value.
-   *
-   * @return true if the elevator is at a floor, false otherwise
-   */
-  boolean isBetweenFloors() {
-    // Calculate the delta of the position of the floor and the rounded position of the floor.
-    float delta = Math.abs(this.currentFloor - Math.round(this.currentFloor));
-
-    return !(delta < 1e-37);
+  private void sendToTop() {
+    this.direction = Direction.UP;
+    this.clearStopRequests();
+    this.floorRequests[this.maxFloor - 1] = true;
   }
+
+  private void sentToBottom() {
+    this.direction = Direction.DOWN;
+    this.clearStopRequests();
+    this.floorRequests[0] = true;
+  }
+
 
   /**
    * toString implementation.
@@ -244,120 +256,6 @@ public class Elevator implements ElevatorInterface {
         this.currentFloor,
         this.direction,
         this.doorClosed ? "closed" : "open");
-
-  }
-
-  /**
-   * update the status of the elevator
-   * This is used to update the status of the elevator in the display.
-   */
-  private void updateDisplay() {
-    if (this.displayLabel != null) {
-      this.displayLabel.setText(this.toString());
-    }
-    if (this.displaySlider != null) {
-      this.displaySlider.setValue((int) (this.currentFloor * 10));
-    }
-  }
-
-  /**
-   * The panel for the elevator   .
-   *
-   * @return a swing component that has the information of the elevator.
-   */
-  private JComponent getElevatorPositionPanel() {
-    JSlider slider = new JSlider(JSlider.VERTICAL,
-        0, (this.maxFloor - 1) * 10,
-        (int) (this.currentFloor * 100));
-    slider.setPaintTicks(true);
-    slider.setMajorTickSpacing(10);
-
-
-    slider.setEnabled(false);
-
-    slider.setPaintTicks(true);
-    slider.setValue((int) this.currentFloor * 10);
-    this.displaySlider = slider;
-
-    return slider;
-  }
-
-  /**
-   * The panel for the elevator.
-   *
-   * @return the swing component that has the information of the elevator.
-   */
-  private JComponent getElevatorPanel() {
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    panel.add(this.getElevatorPositionPanel());
-    panel.setVisible(true);
-    return panel;
-  }
-
-  /**
-   * the Status panel.
-   *
-   * @return a swing component that has the information of the elevator.
-   */
-  private JComponent getStatusPanel() {
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    JLabel display = new JLabel(this.toString());
-    display.setText(this.toString());
-    this.displayLabel = display;
-    panel.add(display);
-    return panel;
-  }
-
-  /**
-   * debug control buttons for the elevator.
-   *
-   * @return a swing component that has debug buttons for the elevator
-   */
-  private JComponent getControlPanel() {
-    int buttonWidth = 10;
-    int buttonHeight = 20;
-    JPanel panel = new JPanel();
-    panel.setLayout(new GridLayout(1, 3, 0, 0));
-    JButton upButton = new JButton("^");
-    upButton.addActionListener(e -> this.setDirection(Direction.UP));
-    upButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-    upButton.setMargin(new Insets(0, 0, 0, 0));
-    panel.add(upButton);
-
-    JButton downButton = new JButton("v");
-    downButton.addActionListener(e -> this.setDirection(Direction.DOWN));
-    downButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-    downButton.setMargin(new Insets(0, 0, 0, 0));
-    panel.add(downButton);
-
-    JButton stopButton = new JButton("-");
-    stopButton.addActionListener(e -> this.setDirection(Direction.STOPPED));
-    stopButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-    stopButton.setMargin(new Insets(0, 0, 0, 0));
-    panel.add(stopButton);
-    return panel;
-  }
-
-  /**
-   * getDisplay implementation.
-   *
-   * @return a swing component that has the information of the elevator.
-   */
-  public JComponent getDisplay() {
-    // We will make a panel with the total number of floors.
-    // the label for the elevator will be positioned at the correct floor.
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-    panel.add(this.getElevatorPanel());
-    panel.add(this.getStatusPanel());
-    panel.add(this.getControlPanel());
-    panel.setVisible(true);
-
-    return panel;
-
 
   }
 

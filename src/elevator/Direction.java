@@ -1,4 +1,5 @@
 package elevator;
+
 /**
  * The direction of the elevator.
  */

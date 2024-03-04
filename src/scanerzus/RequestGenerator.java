@@ -44,7 +44,6 @@ public class RequestGenerator {
    * Generate a up request for the elevator.
    * If the elevator is at the top floor then the request will be null.
    *
-   * @param startFloor the floor the request is generated on
    * @return the request
    */
   public Request generateUpRequest() {
