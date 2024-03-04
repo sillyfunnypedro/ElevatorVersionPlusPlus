@@ -12,7 +12,7 @@ public interface ElevatorInterface {
    *
    * @return the elevator ID as a string.
    */
-  public String getElevatorId();
+  public int getElevatorId();
 
   /**
    * Returns the maximum number of floors the elevator can go to.
@@ -20,6 +20,7 @@ public interface ElevatorInterface {
    * @return the maximum number of floors the elevator can go to.
    */
   public int getMaxFloor();
+
 
   /**
    * maxOccupancy getter
@@ -38,23 +39,13 @@ public interface ElevatorInterface {
 
   public int getCurrentFloor();
 
-  /**
-   * Moves the elevator by one floor.
-   */
-  public void step();
 
   /**
    * Returns the direction the elevator is moving in.
    *
    * @return the direction the elevator is moving in.
    */
-
   public Direction getDirection();
-
-  /**
-   * Take out of service.
-   */
-  public void takeOutOfService();
 
   /**
    * start elevator.
@@ -63,9 +54,26 @@ public interface ElevatorInterface {
    */
   public void start();
 
+
+  /**
+   * Take out of service.
+   */
+  public void takeOutOfService();
+
+  /**
+   * Moves the elevator by one floor.
+   * The elevator is going to move by one floor in the direction it is currently moving.
+   * If the elevator is stopped, it will not move.
+   * If the elevator arrives at a floor where it is supposed to stop then it will open
+   * its doors and let people out.
+   * The elevator will stop for three-step increments then it will close its doors and move on.
+   * If the elevator is moving up, and it arrives at the top floor, it will change direction.
+   */
+  public void step();
+
   /**
    * processRequest
-   * This will add a request to the elevator.
+   * This will tell the elevator to process these requests on the next run.
    *
    * @param request the request to add to the elevator.
    */

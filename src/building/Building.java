@@ -5,7 +5,6 @@ import scanerzus.Request;
 import scanerzus.RequestGenerator;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * This class represents a building.
@@ -105,6 +104,11 @@ public class Building implements BuildingInterface {
         + "numberOfFloors=" + numberOfFloors
         + ", numberOfElevators=" + numberOfElevators
         + '}';
+  }
+
+  @Override
+  public boolean receiveRequest(Request request) {
+    return false;
   }
 
 

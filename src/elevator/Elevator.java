@@ -1,10 +1,9 @@
 package elevator;
 
+import java.util.ArrayList;
+
 import scanerzus.Request;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * An implementation of the Elevator interface.
@@ -19,6 +18,21 @@ public class Elevator implements ElevatorInterface {
    * The maximum number of people that can fit in the elevator.
    */
   private final int maxOccupancy;
+
+  /**
+   * The integer that stores the static value used to initialize the elevator
+   * id.
+   * This is a unique identifier for the elevator.
+   */
+  private static int newElevatorId = 0;
+
+  /**
+   * The id of the elevator.
+   * This is a unique identifier for the elevator.
+   * This is initialized using a static variable that is incremented each time
+   */
+  private final int id = newElevatorId++;
+
 
   /**
    * The current floor of the elevator.
@@ -65,7 +79,7 @@ public class Elevator implements ElevatorInterface {
    *                     must be less than 20 (fire code)
    * @throws IllegalArgumentException if the maxFloor or maxOccupancy is out of range
    */
-  public Elevator(int maxFloor, int maxOccupancy) {
+  public Elevator(int maxFloor, int maxOccupancy, int id) {
     if (maxFloor < 1 || maxFloor > 30) {
       throw new IllegalArgumentException("maxFloor must be between 1 and 30");
     }
@@ -79,8 +93,12 @@ public class Elevator implements ElevatorInterface {
     this.direction = Direction.STOPPED;
     this.outOfService = true;
     this.floorRequests = new boolean[maxFloor];
+
   }
 
+  /**
+   * Start the elevator.  This does nothing if the elevator is not on the groundfloor and its doors are open.
+   */
   @Override
   public void start() {
     this.outOfService = false;
@@ -111,10 +129,9 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * maxOccupancy getter
-   * Notice that it is not the responsibility of the elevator to keep track of the people in the elevator.
+   * maxOccupancy getter.
    *
-   * @return the maximum number of people that can fit in the elevator
+   * @return the maximum number of people that can fit in the elevator.
    */
   @Override
   public int getMaxOccupancy() {
@@ -122,15 +139,22 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * Direction getter
+   * Direction getter.
    *
-   * @return the direction the elevator is moving
+   * @return the direction the elevator is moving.
    */
   @Override
   public Direction getDirection() {
     return this.direction;
   }
 
+  /**
+   * Get Elevator Id.
+   */
+  @Override
+  public int getElevatorId() {
+    return this.id;
+  }
 
   private void getStopRequests(ArrayList<Request> requests) {
     clearStopRequests();
@@ -252,7 +276,7 @@ public class Elevator implements ElevatorInterface {
   @Override
   public String toString() {
 
-    return String.format("[%03.1f|%s|%s]",
+    return String.format("[%d|%s|%s]",
         this.currentFloor,
         this.direction,
         this.doorClosed ? "closed" : "open");
