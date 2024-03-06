@@ -1,10 +1,14 @@
+
+
 package building;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import elevator.Elevator;
 import scanerzus.Request;
-import scanerzus.RequestGenerator;
 
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a building.
@@ -14,15 +18,11 @@ public class Building implements BuildingInterface {
   private final int numberOfFloors;
   private final int numberOfElevators;
 
-  private final RequestGenerator requestGenerator;
-
   private int elevatorCapacity = 30;
 
   private final Elevator[] elevators;
 
-  private final JFrame displayFrame = null;
-
-  private final int sliderWidth = 95;
+  private final List<Request> requests = new ArrayList<Request>();
 
 
   /**
@@ -56,7 +56,7 @@ public class Building implements BuildingInterface {
     this.elevatorCapacity = elevatorCapacity;
 
     // Initialize the RequestGenerator
-    this.requestGenerator = new RequestGenerator(numberOfFloors);
+
 
     // Initialize the Elevators in the building
     this.elevators = new Elevator[numberOfElevators];
@@ -64,18 +64,6 @@ public class Building implements BuildingInterface {
     for (int i = 0; i < numberOfElevators; i++) {
       this.elevators[i] = new Elevator(numberOfFloors, this.elevatorCapacity);
     }
-
-    BuildingDisplay display = new BuildingDisplay(this.elevators,
-        this.makeStepRunnable(),
-        this.makeRunRunnable(),
-        this.makeStopRunnable(),
-        this.makeResetRunnable(),
-        this.makeRandomRequestRunnable(),
-        this.makeRandomUpRequestRunnable(),
-        this.makeRandomDownRequestRunnable());
-
-
-    display.initializeDisplay();
   }
 
   /**
@@ -89,7 +77,7 @@ public class Building implements BuildingInterface {
   }
 
   /**
-   * This method is used to get the number of Elevators in the building.
+   * This method is used to get the number of elevators in the building.
    *
    * @return the number of elevators in the building
    */
@@ -98,174 +86,62 @@ public class Building implements BuildingInterface {
     return 0;
   }
 
-  @Override
-  public String toString() {
-    return "Building{"
-        + "numberOfFloors=" + numberOfFloors
-        + ", numberOfElevators=" + numberOfElevators
-        + '}';
-  }
-
-  @Override
-  public boolean receiveRequest(Request request) {
-    return false;
-  }
-
 
   /**
-   * returns a Runnable that will call step() on the building.
+   * Create a JSON object with the status of the elevator system.
    *
-   * @return a Runnable that will call step() on the building.
+   * @return String of the JSON object.
    */
-  public Runnable makeStepRunnable() {
-    return new Runnable() {
-      public void run() {
-        step();
-      }
-    };
+  @Override
+  public String getElevatorSystemStatus() {
+
+
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("numElevators", this.elevators.length);
+    jsonObject.put("numFloors", this.numberOfFloors);
+    jsonObject.put("elevatorCapacity", this.elevatorCapacity);
+
+
+    // make an array of input requests
+    JSONArray inputRequestsJson = new JSONArray();
+    for (Request request : this.requests) {
+      inputRequestsJson.put(request.toJson());
+    }
+
+    jsonObject.put("inputRequests", inputRequestsJson);
+
+
+    // make an array of elevator status
+    JSONArray elevatorStatusJson = new JSONArray();
+
+    for (int i = 0; i < this.elevators.length; i++) {
+      elevatorStatusJson.put("elevator" + i + this.elevators[i].getDirection());
+    }
+    jsonObject.put("elevatorStatus", elevatorStatusJson);
+
+    return jsonObject.toString();
 
   }
 
   /**
-   * This method is used to step the building.
+   * This method is used to add a request to the building.
+   *
+   * @param request the request to be added to the building
    */
-  private void step() {
-    System.out.println("Stepping the building");
-    for (Elevator elevator : elevators) {
+  @Override
+  public void addRequest(Request request) {
+    this.requests.add(request);
+  }
+
+  /**
+   * This method is used to step the building elevator system.
+   */
+  @Override
+  public void step() {
+    for (Elevator elevator : this.elevators) {
       elevator.step();
     }
   }
-
-  /**
-   * returns a Runnable that will call stop() on the building.
-   *
-   * @return a Runnable that will call stop() on the building.
-   */
-  public Runnable makeStopRunnable() {
-    return new Runnable() {
-      public void run() {
-        stop();
-      }
-    };
-  }
-
-  /**
-   * This method is used to stop the building.
-   */
-  private void stop() {
-    System.out.println("Stopping the building");
-  }
-
-  /**
-   * returns a Runnable that will call run() on the building.
-   *
-   * @return a Runnable that will call run() on the building.
-   */
-  public Runnable makeRunRunnable() {
-    return new Runnable() {
-      public void run() {
-        runBuilding();
-      }
-    };
-  }
-
-  /**
-   * This method is used to run the building.
-   */
-  private void runBuilding() {
-    System.out.println("Running the building");
-  }
-
-
-  /**
-   * returns a Runnable that will call reset() on the building.
-   *
-   * @return a Runnable that will call reset() on the building.
-   */
-  public Runnable makeResetRunnable() {
-    return new Runnable() {
-      public void run() {
-        resetBuilding();
-      }
-    };
-  }
-
-
-  /**
-   * This method is used to reset the building.
-   */
-  private void resetBuilding() {
-    System.out.println("Resetting the building");
-  }
-
-
-  /**
-   * returns a runnable that will get a random request for the building.
-   *
-   * @return a runnable that will get a random request for the building.
-   */
-  public Runnable makeRandomRequestRunnable() {
-    return new Runnable() {
-      public void run() {
-        randomRequest();
-      }
-    };
-  }
-
-  /**
-   * This method is used to get a random request for the building.
-   */
-  private void randomRequest() {
-    Request request = requestGenerator.generateRequestRandom();
-
-    System.out.println("Found a random request: " + request);
-  }
-
-  /**
-   * returns a runnable that will get a random up request for the building.
-   *
-   * @return a runnable that will get a random up request for the building.
-   */
-  public Runnable makeRandomUpRequestRunnable() {
-    return new Runnable() {
-      public void run() {
-        randomUpRequest();
-      }
-    };
-  }
-
-  /**
-   * This method is used to get a random up request for the building.
-   */
-  private void randomUpRequest() {
-    Request request = requestGenerator.generateUpRequest();
-
-    System.out.println("Found a random up request: " + request);
-  }
-
-  /**
-   * returns a runnable that will get a random down request for the building.
-   *
-   * @return a runnable that will get a random down request for the building.
-   */
-  public Runnable makeRandomDownRequestRunnable() {
-    return new Runnable() {
-      public void run() {
-        randomDownRequest();
-      }
-    };
-  }
-
-  /**
-   * This method is used to get a random down request for the building.
-   */
-  private void randomDownRequest() {
-    Request request = requestGenerator.generateDownRequest();
-
-    System.out.println("Found a random down request: " + request);
-  }
-
-
 }
 
 

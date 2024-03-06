@@ -79,7 +79,7 @@ public class Elevator implements ElevatorInterface {
    *                     must be less than 20 (fire code)
    * @throws IllegalArgumentException if the maxFloor or maxOccupancy is out of range
    */
-  public Elevator(int maxFloor, int maxOccupancy, int id) {
+  public Elevator(int maxFloor, int maxOccupancy) {
     if (maxFloor < 1 || maxFloor > 30) {
       throw new IllegalArgumentException("maxFloor must be between 1 and 30");
     }
@@ -281,6 +281,22 @@ public class Elevator implements ElevatorInterface {
         this.direction,
         this.doorClosed ? "closed" : "open");
 
+  }
+
+  @Override
+  public void processRequests(ArrayList<Request> requests) {
+    for (Request request : requests) {
+      if (request.getStartFloor() < request.getEndFloor()) {
+        this.upRequests.add(request);
+      } else {
+        this.downRequests.add(request);
+      }
+    }
+  }
+
+  @Override
+  public void takeOutOfService() {
+    this.outOfService = true;
   }
 
 

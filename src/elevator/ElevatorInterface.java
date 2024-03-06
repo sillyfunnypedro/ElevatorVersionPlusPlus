@@ -2,6 +2,8 @@ package elevator;
 
 import scanerzus.Request;
 
+import java.util.ArrayList;
+
 /**
  * An interface for an elevator.
  */
@@ -75,9 +77,9 @@ public interface ElevatorInterface {
    * processRequest
    * This will tell the elevator to process these requests on the next run.
    *
-   * @param request the request to add to the elevator.
+   * @param requests the request to add to the elevator.
    */
-  public void processRequests(Request[] request);
+  public void processRequests(ArrayList<Request> requests);
 
 
 }

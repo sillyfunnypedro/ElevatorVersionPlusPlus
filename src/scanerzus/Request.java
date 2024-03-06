@@ -1,5 +1,7 @@
 package scanerzus;
 
+import org.json.JSONObject;
+
 /**
  * This class represents a request to the elevator.
  * All requests have a startFloor and endFloor
@@ -53,5 +55,17 @@ public class Request implements RequestInterface {
    */
   public String toString() {
     return startFloor + "->" + endFloor;
+  }
+
+  /**
+   * Returns a JSON representation of the request.
+   *
+   * @return a JSON representation of the request.
+   */
+  public JSONObject toJson() {
+    JSONObject requestJson = new JSONObject();
+    requestJson.put("startFloor", this.startFloor);
+    requestJson.put("endFloor", this.endFloor);
+    return requestJson;
   }
 }

@@ -21,17 +21,10 @@ public interface BuildingInterface {
   int getNumberOfElevators();
 
   /**
-   * This method is used to receive a request from the elevator request system.
-   *
-   * @param request the request to receive. It is of type Request.
-   */
-  boolean receiveRequest(Request request);
-
-  /**
    * This method is used to get the elevator system status.
    *
    * @return the elevator system status
-   * json string that contains the status of the elevator system
+   * json string that contains the status of the elevator system.
    * {
    * "runStatus": "running", // running, stopped, stopping
    * "elevatorStatus": [
@@ -56,5 +49,16 @@ public interface BuildingInterface {
    */
   String getElevatorSystemStatus();
 
+  /**
+   * This method is used to add a request to the building.
+   *
+   * @param request the request to be added to the building
+   */
+  public void addRequest(Request request);
+
+  /**
+   * This method is used to step the building elevator system.
+   */
+  public void step();
 
 }

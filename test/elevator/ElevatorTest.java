@@ -32,17 +32,6 @@ public class ElevatorTest {
     assertEquals(5, elevator.getMaxOccupancy());
   }
 
-  /**
-   * Move up by .1 of a floor.
-   */
-  @Test
-  public void elevatorMovesUp() {
-    System.out.println("Testing: elevatorMovesUp");
-    Elevator elevator = new Elevator(10, 5);
-    elevator.processRequest(new Request(0, 1));
-    elevator.step();
-    assertEquals(1, elevator.getCurrentFloor());
-  }
 
   /**
    * Move to the top of the elevator checking at each floor
