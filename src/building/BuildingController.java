@@ -2,10 +2,12 @@ package building;
 
 import scanerzus.Request;
 
+/**
+ * This is the building controller for our building.
+ */
 public class BuildingController implements BuildingControllerInterface {
   private final Building building;
   private final BuildingDisplayInterface display;
-
 
   /**
    * the constructor for the building controller.

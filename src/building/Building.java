@@ -1,6 +1,5 @@
 package building;
 
-import building.enums.ElevatorStatus;
 import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
 import elevator.ElevatorInterface;
@@ -38,7 +37,9 @@ public class Building implements BuildingInterface {
    * @param numberOfElevators the number of elevators in the building
    * @param elevatorCapacity  the maximum number of people that can be in an elevator at once
    */
-  public Building(int numberOfFloors, int numberOfElevators, int elevatorCapacity) throws IllegalArgumentException {
+  public Building(int numberOfFloors,
+                  int numberOfElevators,
+                  int elevatorCapacity) throws IllegalArgumentException {
     // check the parameters for validity.
 
     // are floors greater than or equal to 2.
@@ -167,11 +168,13 @@ public class Building implements BuildingInterface {
     }
 
     if (request.getStartFloor() < 0 || request.getStartFloor() >= this.numberOfFloors) {
-      throw new IllegalArgumentException("Start floor must be between 0 and " + (this.numberOfFloors - 1));
+      throw new IllegalArgumentException("Start floor must be between 0 and "
+          + (this.numberOfFloors - 1));
     }
 
     if (request.getEndFloor() < 0 || request.getEndFloor() >= this.numberOfFloors) {
-      throw new IllegalArgumentException("End floor must be between 0 and " + (this.numberOfFloors - 1));
+      throw new IllegalArgumentException("End floor must be between 0 and "
+          + (this.numberOfFloors - 1));
     }
 
     if (request.getStartFloor() == request.getEndFloor()) {

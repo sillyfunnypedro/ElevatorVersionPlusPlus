@@ -1,6 +1,6 @@
 package elevator;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 import building.enums.Direction;
@@ -26,7 +26,7 @@ public class Elevator implements ElevatorInterface {
   /**
    * Is the elevator taking requests.
    */
-  private boolean takingRequests = false;
+  private boolean takingRequests;
 
   /**
    * The integer that stores the static value used to initialize the elevator
@@ -63,7 +63,7 @@ public class Elevator implements ElevatorInterface {
   private final boolean[] floorRequests; // true if there is a request for the floor.
 
   /**
-   * The state of the door
+   * The state of the door.
    */
   private boolean doorClosed = true;
 
@@ -102,7 +102,8 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * Start the elevator.  This does nothing if the elevator is not on the groundfloor and its doors are open.
+   * Start the elevator.  This does nothing if the elevator is not
+   * on the ground floor and its doors are open.
    */
   @Override
   public void start() {

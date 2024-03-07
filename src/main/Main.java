@@ -1,6 +1,10 @@
 package main;
 
-import building.*;
+
+import building.Building;
+import building.BuildingController;
+import building.BuildingDisplayInterface;
+import building.ConsoleBuildingDisplay;
 
 /**
  * The driver for the elevator system.
