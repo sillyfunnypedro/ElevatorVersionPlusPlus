@@ -1,12 +1,16 @@
 package elevator;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import building.enums.Direction;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import scanerzus.Request;
 
 
 /**
- * An implementation of the Elevator interface.
+ * An implementation of the ElevatorStatus interface.
  */
 public class Elevator implements ElevatorInterface {
   /**
@@ -23,6 +27,8 @@ public class Elevator implements ElevatorInterface {
    * The integer that stores the static value used to initialize the elevator
    * id.
    * This is a unique identifier for the elevator.
+   * <p>
+   * Added a checkstyle suppression for DeclarationOrder since it is buggy
    */
   private static int newElevatorId = 0;
 
@@ -41,28 +47,20 @@ public class Elevator implements ElevatorInterface {
   private int currentFloor;
 
   /**
-   * The amount of a floor that the elevator will move each step.
-   */
-  private final int floorIncrement = 1; // This is set by the manufacturer.
-
-  /**
    * The direction the elevator is moving.
    */
   private Direction direction;
 
-  private ArrayList<Request> upRequests;
-  private ArrayList<Request> downRequests;
-
   private int openDoorTimer = 0;
 
-  private boolean makingRun = false;
 
-  private boolean floorRequests[]; // true if there is a request for the floor.
+  private final boolean[] floorRequests; // true if there is a request for the floor.
 
   /**
    * The state of the door
    */
   private boolean doorClosed = true;
+
 
   private boolean outOfService; // start must be issued on the elevator to start it.
 
@@ -102,8 +100,6 @@ public class Elevator implements ElevatorInterface {
   @Override
   public void start() {
     this.outOfService = false;
-    this.upRequests = new ArrayList<Request>();
-    this.downRequests = new ArrayList<Request>();
     clearStopRequests();
     this.doorClosed = true;
   }
@@ -119,7 +115,7 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * maxFloor getter
+   * maxFloor getter.
    *
    * @return the total number of floors in the building
    */
@@ -149,14 +145,34 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * Get Elevator Id.
+   * Get ElevatorStatus Id.
    */
   @Override
   public int getElevatorId() {
     return this.id;
   }
 
-  private void getStopRequests(ArrayList<Request> requests) {
+  /**
+   * Get the door status.
+   *
+   * @return the door status of the elevator.
+   */
+  @Override
+  public boolean isDoorClosed() {
+    return doorClosed;
+  }
+
+  /**
+   * Return the current stop requests.
+   *
+   * @return the current stop requests.
+   */
+  @Override
+  public boolean[] getFloorRequests() {
+    return this.floorRequests;
+  }
+
+  private void processStopRequests(List<Request> requests) {
     clearStopRequests();
 
     for (Request request : requests) {
@@ -187,15 +203,8 @@ public class Elevator implements ElevatorInterface {
     if (this.outOfService) {
       return;
     }
-    // if the elevator is at floor 0 and there are no requests then stay still.
-    if (this.currentFloor == 0 && this.upRequests.isEmpty() && this.downRequests.isEmpty()) {
-      return;
-    }
 
-    if (!this.makingRun) {
-      this.setupRun();
-    }
-
+    // If the door is open we decrease the door open timer and return.
     if (this.openDoorTimer > 0) {
       this.openDoorTimer--;
       if (this.openDoorTimer == 0) {
@@ -205,6 +214,7 @@ public class Elevator implements ElevatorInterface {
     }
 
     // now we check to see if there is a request at this floor
+    // We open the door and set the timer for 3 steps.
     if (this.floorRequests[this.currentFloor]) {
       this.doorClosed = false;
       this.openDoorTimer = 3;
@@ -212,45 +222,28 @@ public class Elevator implements ElevatorInterface {
       return;
     }
 
+
+    // if we get here we are free to move the elevator.
     // if we get here we move by one floor in the direction of the elevator.
+
+    /**
+     * The amount of a floor that the elevator will move each step.
+     */
+    // This is set by the manufacturer.
+    int floorIncrement = 1;
     if (this.direction == Direction.UP) {
-      this.currentFloor += this.floorIncrement;
+      this.currentFloor += floorIncrement;
       if (this.currentFloor >= this.maxFloor) {
         this.currentFloor = this.maxFloor - 1;
         this.direction = Direction.STOPPED;
       }
     } else {
-      this.currentFloor -= this.floorIncrement;
+      this.currentFloor -= floorIncrement;
       if (this.currentFloor < 0) {
         this.currentFloor = 0;
         this.direction = Direction.STOPPED;
       }
     }
-
-  }
-
-  private void setupRun() {
-    // if both queues are empty then we are done.
-    if (this.upRequests.isEmpty() && this.downRequests.isEmpty()) {
-      this.makingRun = false;
-      return;
-    }
-
-    // if we are at the bottom floor we need to go up.
-    // and we need to add the final floor to the stop requests.
-    if (this.currentFloor == 0) {
-      this.direction = Direction.UP;
-      this.getStopRequests(this.upRequests);
-      this.floorRequests[this.maxFloor - 1] = true;
-      this.makingRun = true;
-      return;
-    }
-
-    // if we are at the top floor we need to go down.
-    // and we need to add the ground floor to the stop requests.
-    this.direction = Direction.DOWN;
-    this.getStopRequests(this.downRequests);
-    this.floorRequests[0] = true;
 
   }
 
@@ -275,25 +268,61 @@ public class Elevator implements ElevatorInterface {
    */
   @Override
   public String toString() {
-
-    return String.format("[%d|%s|%s]",
+    StringBuilder sb = new StringBuilder();
+    sb.append(String.format("[%d|%s|%s]<",
         this.currentFloor,
         this.direction,
-        this.doorClosed ? "closed" : "open");
-
-  }
-
-  @Override
-  public void processRequests(ArrayList<Request> requests) {
-    for (Request request : requests) {
-      if (request.getStartFloor() < request.getEndFloor()) {
-        this.upRequests.add(request);
+        this.doorClosed ? "closed" : "open"));
+    for (int i = 0; i < this.maxFloor; i++) {
+      if (this.floorRequests[i]) {
+        sb.append(String.format(" %2d", i));
       } else {
-        this.downRequests.add(request);
+        sb.append(" --");
       }
     }
+    sb.append(">");
+
+    return sb.toString();
+
   }
 
+  /**
+   * toJson implementation.
+   *
+   * @return json representation of the elevator.
+   */
+  @Override
+  public JSONObject toJson() {
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("elevatorId", this.id);
+    jsonObject.put("currentFloor", this.currentFloor);
+    jsonObject.put("direction", this.direction);
+    jsonObject.put("doorStatus", this.doorClosed ? "closed" : "open");
+    if (!this.doorClosed && this.openDoorTimer > 0) {
+      jsonObject.put("openDoorTimer", this.openDoorTimer);
+    }
+    JSONArray floorRequestsJson = new JSONArray();
+    for (int i = 0; i < this.maxFloor; i++) {
+      if (this.floorRequests[i]) {
+        floorRequestsJson.put(i);
+      }
+    }
+    jsonObject.put("floorRequests", floorRequestsJson);
+    return jsonObject;
+  }
+
+  /**
+   * Process the requests
+   */
+  @Override
+  public void processRequests(List<Request> requests) {
+    this.processStopRequests(requests);
+
+  }
+
+  /**
+   * Take the elevator out of service.
+   */
   @Override
   public void takeOutOfService() {
     this.outOfService = true;

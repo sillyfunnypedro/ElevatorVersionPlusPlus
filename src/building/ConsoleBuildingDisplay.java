@@ -1,5 +1,9 @@
 package building;
 
+import building.handlers.RequestHandler;
+import building.handlers.StepHandler;
+import building.handlers.UpdateHandler;
+import org.json.JSONObject;
 import scanerzus.Request;
 
 import java.util.Scanner;
@@ -66,6 +70,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
     System.out.println("r fromFloor, toFloor: request an elevator from fromFloor to toFloor.");
     Scanner scanner = new Scanner(System.in);
 
+
     while (true) {
       this.displayPrompt();
 
@@ -73,7 +78,9 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
       switch (command[0]) {
         case "s":
 
-
+          if (this.stepHandler != null) {
+            this.stepHandler.handleRequest();
+          }
           break;
         case "q":
           System.out.println("Quitting the simulation");
@@ -96,10 +103,8 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
   private void updateDisplay() {
     if (this.updateHandler != null) {
-      String buildingStatus = this.updateHandler.handleRequest();
-
-      System.out.println(buildingStatus);
-      System.out.println(this.updateHandler.handleRequest());
+      JSONObject buildingStatus = this.updateHandler.handleRequest();
+      System.out.println(buildingStatus.toString(2));
     }
   }
 

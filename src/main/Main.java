@@ -22,8 +22,8 @@ public class Main {
     // the number of floors, the number of elevators, and the number of people.
 
     final int numFloors = 4;
-    final int numElevators = 6;
-    final int numPeople = 20;
+    final int numElevators = 1;
+    final int numPeople = 3;
 
 
     Building building = new Building(numFloors, numElevators, numPeople);

@@ -1,14 +1,17 @@
-
-
 package building;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import building.enums.ElevatorStatus;
+import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
-import scanerzus.Request;
+import elevator.ElevatorInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import scanerzus.Request;
+
 
 /**
  * This class represents a building.
@@ -18,11 +21,14 @@ public class Building implements BuildingInterface {
   private final int numberOfFloors;
   private final int numberOfElevators;
 
-  private int elevatorCapacity = 30;
+  private final int elevatorCapacity;
 
-  private final Elevator[] elevators;
+  private final ElevatorInterface[] elevators;
 
-  private final List<Request> requests = new ArrayList<Request>();
+  private final List<Request> upRequests = new ArrayList<Request>();
+  private final List<Request> downRequests = new ArrayList<Request>();
+
+  private ElevatorSystemStatus elevatorsStatus;
 
 
   /**
@@ -58,12 +64,20 @@ public class Building implements BuildingInterface {
     // Initialize the RequestGenerator
 
 
-    // Initialize the Elevators in the building
+    // Initialize the ElevatorSystemStatus in the building
     this.elevators = new Elevator[numberOfElevators];
 
     for (int i = 0; i < numberOfElevators; i++) {
       this.elevators[i] = new Elevator(numberOfFloors, this.elevatorCapacity);
     }
+  }
+
+  /**
+   * This method is used to start the building elevator system.
+   */
+  @Override
+  public void start() {
+    // do nothing
   }
 
   /**
@@ -73,7 +87,7 @@ public class Building implements BuildingInterface {
    */
   @Override
   public int getNumberOfFloors() {
-    return 0;
+    return this.numberOfFloors;
   }
 
   /**
@@ -83,9 +97,18 @@ public class Building implements BuildingInterface {
    */
   @Override
   public int getNumberOfElevators() {
-    return 0;
+    return this.numberOfElevators;
   }
 
+  /**
+   * This method is used to get the max occupancy of the elevator.
+   *
+   * @return the max occupancy of the elevator.
+   */
+  @Override
+  public int getElevatorCapacity() {
+    return this.elevatorCapacity;
+  }
 
   /**
    * Create a JSON object with the status of the elevator system.
@@ -93,7 +116,7 @@ public class Building implements BuildingInterface {
    * @return String of the JSON object.
    */
   @Override
-  public String getElevatorSystemStatus() {
+  public JSONObject getElevatorSystemStatus() {
 
 
     JSONObject jsonObject = new JSONObject();
@@ -104,7 +127,7 @@ public class Building implements BuildingInterface {
 
     // make an array of input requests
     JSONArray inputRequestsJson = new JSONArray();
-    for (Request request : this.requests) {
+    for (Request request : this.upRequests) {
       inputRequestsJson.put(request.toJson());
     }
 
@@ -114,12 +137,13 @@ public class Building implements BuildingInterface {
     // make an array of elevator status
     JSONArray elevatorStatusJson = new JSONArray();
 
-    for (int i = 0; i < this.elevators.length; i++) {
-      elevatorStatusJson.put("elevator" + i + this.elevators[i].getDirection());
+    for (ElevatorInterface elevator : this.elevators) {
+      elevatorStatusJson.put(elevator.toJson());
     }
+
     jsonObject.put("elevatorStatus", elevatorStatusJson);
 
-    return jsonObject.toString();
+    return jsonObject;
 
   }
 
@@ -130,7 +154,28 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void addRequest(Request request) {
-    this.requests.add(request);
+    if (request == null) {
+      throw new IllegalArgumentException("Request cannot be null");
+    }
+
+    if (request.getStartFloor() < 0 || request.getStartFloor() >= this.numberOfFloors) {
+      throw new IllegalArgumentException("Start floor must be between 0 and " + (this.numberOfFloors - 1));
+    }
+
+    if (request.getEndFloor() < 0 || request.getEndFloor() >= this.numberOfFloors) {
+      throw new IllegalArgumentException("End floor must be between 0 and " + (this.numberOfFloors - 1));
+    }
+
+    if (request.getStartFloor() == request.getEndFloor()) {
+      throw new IllegalArgumentException("Start floor and end floor cannot be the same");
+    }
+
+    if (request.getStartFloor() < request.getEndFloor()) {
+      this.upRequests.add(request);
+    } else {
+      this.downRequests.add(request);
+    }
+
   }
 
   /**
@@ -138,10 +183,51 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void step() {
-    for (Elevator elevator : this.elevators) {
+    this.distributeRequests();
+    for (ElevatorInterface elevator : this.elevators) {
       elevator.step();
     }
   }
+
+  /**
+   * This method is used to distribute the requests to the elevators.
+   * Only elevators on the ground floor and top floor will be considered.
+   */
+  private void distributeRequests() {
+    if (this.upRequests.isEmpty()) {
+      return;
+    }
+
+
+    // iterate over the elevators if they are on the ground floor
+    // add upRequests up to the capacity of the elevator.
+    // if the elevator is on the top floor add downRequests up to the capacity of the elevator.
+    for (ElevatorInterface elevator : this.elevators) {
+      if (elevator.getCurrentFloor() == 0 && elevator.isDoorClosed()) {
+        List<Request> upRequestsForElevator = getRequests(this.upRequests);
+        elevator.processRequests(upRequestsForElevator);
+      } else if (elevator.getCurrentFloor() == this.numberOfFloors - 1) {
+        List<Request> downRequestsForElevator = getRequests(this.downRequests);
+        elevator.processRequests(downRequestsForElevator);
+      }
+
+    }
+  }
+
+  /**
+   * This method is used to get the requests for the elevators.
+   *
+   * @param requests the requests to get the requests from.
+   * @return the requests to return.
+   */
+  private List<Request> getRequests(List<Request> requests) {
+    List<Request> requestsToReturn = new ArrayList<Request>();
+    while (!requests.isEmpty() && requestsToReturn.size() < this.elevatorCapacity) {
+      requestsToReturn.add(requests.remove(0));
+    }
+    return requestsToReturn;
+  }
+
 }
 
 

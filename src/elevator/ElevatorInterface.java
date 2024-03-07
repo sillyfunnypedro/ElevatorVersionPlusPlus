@@ -1,8 +1,12 @@
 package elevator;
 
+import building.enums.Direction;
+
+import java.util.List;
+
+import org.json.JSONObject;
 import scanerzus.Request;
 
-import java.util.ArrayList;
 
 /**
  * An interface for an elevator.
@@ -10,7 +14,7 @@ import java.util.ArrayList;
 public interface ElevatorInterface {
 
   /**
-   * Elevator ID getter.
+   * ElevatorStatus ID getter.
    *
    * @return the elevator ID as a string.
    */
@@ -50,6 +54,20 @@ public interface ElevatorInterface {
   public Direction getDirection();
 
   /**
+   * Returns the door status of the elevator.
+   *
+   * @return the door status of the elevator.
+   */
+  public boolean isDoorClosed();
+
+  /**
+   * Return the current stop requests.
+   *
+   * @return the current stop requests.
+   */
+  public boolean[] getFloorRequests();
+
+  /**
    * start elevator.
    * This will start the elevator if the elevator is on the ground floor.
    * This means the elevator will accept requests and will start its up and down routine.
@@ -79,7 +97,13 @@ public interface ElevatorInterface {
    *
    * @param requests the request to add to the elevator.
    */
-  public void processRequests(ArrayList<Request> requests);
+  public void processRequests(List<Request> requests);
 
+  /**
+   * This method is used to get the elevator status as a JSON object.
+   *
+   * @return the elevator status.
+   */
+  public JSONObject toJson();
 
 }

@@ -1,5 +1,6 @@
 package building;
 
+import org.json.JSONObject;
 import scanerzus.Request;
 
 /**
@@ -14,40 +15,57 @@ public interface BuildingInterface {
   int getNumberOfFloors();
 
   /**
-   * This method is used to get the number of Elevators in the building.
+   * This method is used to get the number of ElevatorSystemStatus in the building.
    *
    * @return the number of elevators in the building
    */
   int getNumberOfElevators();
 
   /**
+   * This method is used to get the max occupancy of the elevator.
+   *
+   * @return the max occupancy of the elevator
+   */
+  int getElevatorCapacity();
+
+  /**
+   * Start the building elevator system.
+   * This method is used to start the building elevator system.
+   */
+  public void start();
+
+
+
+  /* For a building with 4 floors and 1 elevator, the JSON object returned by getElevatorSystemStatus
+   * would look like this:
+   *
+  {
+  "numElevators": 1,
+  "buildingStatus: "running",
+  "inputRequests": [],
+  "elevatorStatus": [{
+    "elevatorId": 0,
+    "doorStatus": "closed",
+    "currentFloor": 0,
+    "floorRequests": [
+      0,
+      1,
+      2
+    ],
+    "direction": "STOPPED"
+  }],
+  "numFloors": 4,
+  "elevatorCapacity": 3
+}
+   */
+
+  /**
    * This method is used to get the elevator system status.
+   * See the comment above.
    *
    * @return the elevator system status
-   * json string that contains the status of the elevator system.
-   * {
-   * "runStatus": "running", // running, stopped, stopping
-   * "elevatorStatus": [
-   * {
-   * "elevatorId": 0,
-   * "currentFloor": 1, // current floor of the elevator
-   * "direction": "up", // up, down, stopped
-   * "doorStatus": "open" // open, closed
-   * },
-   * {
-   * "elevatorId": 1,
-   * ....
-   * }
-   * ]
-   * "inputRequests": [
-   * {
-   * "startFloor": 1,
-   * "endFloor": 3
-   * }, ......
-   * ]
-   * }
    */
-  String getElevatorSystemStatus();
+  JSONObject getElevatorSystemStatus();
 
   /**
    * This method is used to add a request to the building.

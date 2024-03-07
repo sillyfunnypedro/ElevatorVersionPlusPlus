@@ -1,4 +1,4 @@
-package building;
+package building.handlers;
 
 import scanerzus.Request;
 

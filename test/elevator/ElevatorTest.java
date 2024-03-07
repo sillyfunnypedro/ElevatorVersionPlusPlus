@@ -8,7 +8,7 @@ import org.junit.Test;
 import scanerzus.Request;
 
 /**
- * A JUnit test class for the Elevator class.
+ * A JUnit test class for the ElevatorStatus class.
  */
 public class ElevatorTest {
 

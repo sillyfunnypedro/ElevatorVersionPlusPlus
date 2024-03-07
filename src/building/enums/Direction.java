@@ -1,4 +1,4 @@
-package elevator;
+package building.enums;
 
 /**
  * The direction of the elevator.

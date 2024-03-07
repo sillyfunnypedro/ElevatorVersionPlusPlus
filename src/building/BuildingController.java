@@ -18,19 +18,29 @@ public class BuildingController implements BuildingControllerInterface {
     this.display = display;
 
     // there are two call backs that must be registered
-    display.setUpdateListener(building::getElevatorSystemStatus);
+    display.setUpdateListener(this.building::getElevatorSystemStatus);
 
     display.setRequestListener(this::processRequest);
 
     display.setStepListener(this::step);
+
+
   }
 
-
+  /**
+   * This method is used to process a request.
+   *
+   * @param request the request to process.
+   */
   private void processRequest(Request request) {
     building.addRequest(request);
   }
 
 
+  /**
+   * This method is used to step the building.
+   * This can be used to simulate the building
+   */
   private void step() {
     building.step();
   }

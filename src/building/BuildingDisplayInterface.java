@@ -1,5 +1,9 @@
 package building;
 
+import building.handlers.RequestHandler;
+import building.handlers.StepHandler;
+import building.handlers.UpdateHandler;
+
 /**
  * This interface is used to represent the building display.
  */
