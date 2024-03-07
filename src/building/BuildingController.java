@@ -23,7 +23,7 @@ public class BuildingController implements BuildingControllerInterface {
     display.setRequestListener(this::processRequest);
 
     display.setStepListener(this::step);
-
+    building.start();
 
   }
 

@@ -12,10 +12,9 @@ public enum ElevatorSystemStatus {
   ElevatorSystemStatus(String display) {
     this.display = display;
   }
-
-
+  
   @Override
   public String toString() {
-    return "ELEVATORS";
+    return this.display;
   }
 }

@@ -15,6 +15,6 @@ public enum ElevatorStatus {
 
   @Override
   public String toString() {
-    return "ELEVATORS";
+    return this.display;
   }
 }

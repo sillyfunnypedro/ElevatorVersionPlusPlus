@@ -97,7 +97,15 @@ public interface ElevatorInterface {
    *
    * @param requests the request to add to the elevator.
    */
-  public void processRequests(List<Request> requests);
+  public void processRequests(List<Request> requests) throws IllegalArgumentException;
+
+  /**
+   * isTakingRequests.
+   * This will tell the building if the elevator is taking requests.
+   *
+   * @return true if the elevator is taking requests, false otherwise.
+   */
+  public boolean isTakingRequests();
 
   /**
    * This method is used to get the elevator status as a JSON object.

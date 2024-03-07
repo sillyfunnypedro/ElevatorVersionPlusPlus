@@ -77,7 +77,10 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void start() {
-    // do nothing
+    // for all of the elevators in the building, start them.
+    for (ElevatorInterface elevator : this.elevators) {
+      elevator.start();
+    }
   }
 
   /**
@@ -125,14 +128,19 @@ public class Building implements BuildingInterface {
     jsonObject.put("elevatorCapacity", this.elevatorCapacity);
 
 
-    // make an array of input requests
+    // make an array of upRequests
     JSONArray inputRequestsJson = new JSONArray();
     for (Request request : this.upRequests) {
       inputRequestsJson.put(request.toJson());
     }
+    jsonObject.put("upRequests", inputRequestsJson);
 
-    jsonObject.put("inputRequests", inputRequestsJson);
-
+    // make an array of downRequests
+    JSONArray downRequestsJson = new JSONArray();
+    for (Request request : this.downRequests) {
+      downRequestsJson.put(request.toJson());
+    }
+    jsonObject.put("downRequests", downRequestsJson);
 
     // make an array of elevator status
     JSONArray elevatorStatusJson = new JSONArray();
@@ -203,7 +211,10 @@ public class Building implements BuildingInterface {
     // add upRequests up to the capacity of the elevator.
     // if the elevator is on the top floor add downRequests up to the capacity of the elevator.
     for (ElevatorInterface elevator : this.elevators) {
-      if (elevator.getCurrentFloor() == 0 && elevator.isDoorClosed()) {
+      if (!elevator.isTakingRequests()) {
+        continue;
+      }
+      if (elevator.getCurrentFloor() == 0) {
         List<Request> upRequestsForElevator = getRequests(this.upRequests);
         elevator.processRequests(upRequestsForElevator);
       } else if (elevator.getCurrentFloor() == this.numberOfFloors - 1) {

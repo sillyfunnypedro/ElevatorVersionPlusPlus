@@ -23,7 +23,7 @@ public class Main {
 
     final int numFloors = 4;
     final int numElevators = 1;
-    final int numPeople = 3;
+    final int numPeople = 2;
 
 
     Building building = new Building(numFloors, numElevators, numPeople);

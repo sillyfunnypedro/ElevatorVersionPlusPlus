@@ -8,14 +8,14 @@ public enum Direction {
   DOWN("v"),
   STOPPED("-");
 
-  private final String symbol;
+  private final String display;
 
   Direction(String symbol) {
-    this.symbol = symbol;
+    this.display = symbol;
   }
 
   @Override
   public String toString() {
-    return this.symbol;
+    return this.display;
   }
 }

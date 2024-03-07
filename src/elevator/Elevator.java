@@ -24,6 +24,11 @@ public class Elevator implements ElevatorInterface {
   private final int maxOccupancy;
 
   /**
+   * Is the elevator taking requests.
+   */
+  private boolean takingRequests = false;
+
+  /**
    * The integer that stores the static value used to initialize the elevator
    * id.
    * This is a unique identifier for the elevator.
@@ -45,6 +50,7 @@ public class Elevator implements ElevatorInterface {
    * This is initialized to 0, which is the ground floor.
    */
   private int currentFloor;
+
 
   /**
    * The direction the elevator is moving.
@@ -91,6 +97,7 @@ public class Elevator implements ElevatorInterface {
     this.direction = Direction.STOPPED;
     this.outOfService = true;
     this.floorRequests = new boolean[maxFloor];
+    this.takingRequests = false;
 
   }
 
@@ -100,6 +107,7 @@ public class Elevator implements ElevatorInterface {
   @Override
   public void start() {
     this.outOfService = false;
+    this.takingRequests = true;
     clearStopRequests();
     this.doorClosed = true;
   }
@@ -223,43 +231,26 @@ public class Elevator implements ElevatorInterface {
     }
 
 
-    // if we get here we are free to move the elevator.
-    // if we get here we move by one floor in the direction of the elevator.
-
-    /**
-     * The amount of a floor that the elevator will move each step.
-     */
-    // This is set by the manufacturer.
+    // for the purposes of this assignment we will assume that the elevator
+    // can move one floor in one step.
     int floorIncrement = 1;
     if (this.direction == Direction.UP) {
       this.currentFloor += floorIncrement;
       if (this.currentFloor >= this.maxFloor) {
         this.currentFloor = this.maxFloor - 1;
-        this.direction = Direction.STOPPED;
+        this.direction = Direction.DOWN; // The elevator never stops at the top floor.
+        this.takingRequests = true;
       }
     } else {
       this.currentFloor -= floorIncrement;
       if (this.currentFloor < 0) {
         this.currentFloor = 0;
         this.direction = Direction.STOPPED;
+        this.takingRequests = true;
       }
     }
 
   }
-
-
-  private void sendToTop() {
-    this.direction = Direction.UP;
-    this.clearStopRequests();
-    this.floorRequests[this.maxFloor - 1] = true;
-  }
-
-  private void sentToBottom() {
-    this.direction = Direction.DOWN;
-    this.clearStopRequests();
-    this.floorRequests[0] = true;
-  }
-
 
   /**
    * toString implementation.
@@ -297,10 +288,15 @@ public class Elevator implements ElevatorInterface {
     jsonObject.put("elevatorId", this.id);
     jsonObject.put("currentFloor", this.currentFloor);
     jsonObject.put("direction", this.direction);
-    jsonObject.put("doorStatus", this.doorClosed ? "closed" : "open");
-    if (!this.doorClosed && this.openDoorTimer > 0) {
-      jsonObject.put("openDoorTimer", this.openDoorTimer);
+    JSONObject doorStatus = new JSONObject();
+    if (this.doorClosed) {
+      doorStatus.put("status", "closed");
+    } else {
+      doorStatus.put("status", "open");
+      doorStatus.put("timer", this.openDoorTimer);
     }
+    jsonObject.put("doorStatus", doorStatus);
+
     JSONArray floorRequestsJson = new JSONArray();
     for (int i = 0; i < this.maxFloor; i++) {
       if (this.floorRequests[i]) {
@@ -312,11 +308,31 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * Process the requests
+   * Process the requests.  The Building will only give us requests
+   * that are on the way to our current direction.  That is,
+   * if we are at the bottom or the top.
+   * If a request is received to processRequests and the elevator
+   * is not on the first floor or the top floor then and exception
+   * will be thrown.
    */
   @Override
-  public void processRequests(List<Request> requests) {
+  public void processRequests(List<Request> requests) throws IllegalStateException {
+    if (this.currentFloor != 0 && this.currentFloor != this.maxFloor - 1) {
+      throw new IllegalStateException("Elevator cannot process requests "
+          + "unless it is at the bottom or top floor.");
+    }
+
+    if (requests.isEmpty()) {
+      return;
+    }
+
     this.processStopRequests(requests);
+    if (this.currentFloor == 0) {
+      this.direction = Direction.UP;
+    } else if (this.currentFloor == this.maxFloor - 1) {
+      this.direction = Direction.DOWN;
+    }
+    this.takingRequests = false;
 
   }
 
@@ -326,6 +342,17 @@ public class Elevator implements ElevatorInterface {
   @Override
   public void takeOutOfService() {
     this.outOfService = true;
+  }
+
+  /**
+   * isTakingRequests.
+   * This will return true if the elevator is taking requests.
+   *
+   * @return true if the elevator is taking requests, false otherwise.
+   */
+  @Override
+  public boolean isTakingRequests() {
+    return this.takingRequests;
   }
 
 
