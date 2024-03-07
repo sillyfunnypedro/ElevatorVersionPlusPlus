@@ -1,9 +1,10 @@
 package elevator;
 
 
+import building.enums.Direction;
+
 import java.util.List;
 
-import building.enums.Direction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import scanerzus.Request;
@@ -32,7 +33,7 @@ public class Elevator implements ElevatorInterface {
    * The integer that stores the static value used to initialize the elevator
    * id.
    * This is a unique identifier for the elevator.
-   * <p>
+   *
    * Added a checkstyle suppression for DeclarationOrder since it is buggy
    */
   private static int newElevatorId = 0;
@@ -47,7 +48,7 @@ public class Elevator implements ElevatorInterface {
 
   /**
    * The current floor of the elevator.
-   * This is initialized to 0, which is the ground floor.
+   * This is initialized to 0, which is the first floor.
    */
   private int currentFloor;
 
@@ -68,7 +69,7 @@ public class Elevator implements ElevatorInterface {
   private boolean doorClosed = true;
 
 
-  private boolean outOfService; // start must be issued on the elevator to start it.
+  private boolean outOfService;  // start must be issued on the elevator to start it.
 
 
   /**
@@ -261,10 +262,17 @@ public class Elevator implements ElevatorInterface {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(String.format("[%d|%s|%s]<",
+
+    sb.append(String.format("[%d|%s|",
         this.currentFloor,
-        this.direction,
-        this.doorClosed ? "closed" : "open"));
+        this.direction));
+
+    if (this.doorClosed) {
+      sb.append("closed]<");
+    } else {
+      sb.append(String.format("open %d]<", this.openDoorTimer));
+    }
+
     for (int i = 0; i < this.maxFloor; i++) {
       if (this.floorRequests[i]) {
         sb.append(String.format(" %2d", i));
