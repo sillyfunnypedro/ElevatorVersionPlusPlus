@@ -1,8 +1,6 @@
 package elevator;
 
 import building.enums.Direction;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * This class is used to represent the status of the elevators.
