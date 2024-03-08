@@ -18,14 +18,14 @@ public interface ElevatorInterface {
    *
    * @return the elevator ID as a string.
    */
-  public int getElevatorId();
+  int getElevatorId();
 
   /**
    * Returns the maximum number of floors the elevator can go to.
    *
    * @return the maximum number of floors the elevator can go to.
    */
-  public int getMaxFloor();
+  int getMaxFloor();
 
 
   /**
@@ -35,7 +35,7 @@ public interface ElevatorInterface {
    *
    * @return the maximum number of people that can fit in the elevator.
    */
-  public int getMaxOccupancy();
+  int getMaxOccupancy();
 
   /**
    * Returns the current floor of the elevator.
@@ -43,7 +43,7 @@ public interface ElevatorInterface {
    * @return the current floor of the elevator.
    */
 
-  public int getCurrentFloor();
+  int getCurrentFloor();
 
 
   /**
@@ -51,34 +51,34 @@ public interface ElevatorInterface {
    *
    * @return the direction the elevator is moving in.
    */
-  public Direction getDirection();
+  Direction getDirection();
 
   /**
    * Returns the door status of the elevator.
    *
    * @return the door status of the elevator.
    */
-  public boolean isDoorClosed();
+  boolean isDoorClosed();
 
   /**
    * Return the current stop requests.
    *
    * @return the current stop requests.
    */
-  public boolean[] getFloorRequests();
+  boolean[] getFloorRequests();
 
   /**
    * start elevator.
    * This will start the elevator if the elevator is on the ground floor.
    * This means the elevator will accept requests and will start its up and down routine.
    */
-  public void start();
+  void start();
 
 
   /**
    * Take out of service.
    */
-  public void takeOutOfService();
+  void takeOutOfService();
 
   /**
    * Moves the elevator by one floor.
@@ -90,7 +90,7 @@ public interface ElevatorInterface {
    * If the elevator arrives at the top floor, it will wait for 5 steps then go down.
    * If the elevator arrives at the bottom floor, it will wait for 5 steps then go up.
    */
-  public void step();
+  void step();
 
   /**
    * processUpRequests.
@@ -99,7 +99,7 @@ public interface ElevatorInterface {
    *
    * @param requests the request to add to the elevator.
    */
-  public void processRequests(List<Request> requests) throws IllegalArgumentException;
+  void processRequests(List<Request> requests) throws IllegalArgumentException;
 
 
   /**
@@ -108,13 +108,13 @@ public interface ElevatorInterface {
    *
    * @return true if the elevator is taking requests, false otherwise.
    */
-  public boolean isTakingRequests();
+  boolean isTakingRequests();
 
   /**
    * This method is used to get the elevator status ElevatorReport.
    *
    * @return the elevator status.
    */
-  public ElevatorReport getElevatorStatus();
+  ElevatorReport getElevatorStatus();
 
 }
