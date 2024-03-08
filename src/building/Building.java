@@ -24,8 +24,8 @@ public class Building implements BuildingInterface {
 
   private final ElevatorInterface[] elevators;
 
-  private final List<Request> upRequests = new ArrayList<Request>();
-  private final List<Request> downRequests = new ArrayList<Request>();
+  private final List<Request> upRequests = new ArrayList<>();
+  private final List<Request> downRequests = new ArrayList<>();
 
   private ElevatorSystemStatus elevatorsStatus;
 
