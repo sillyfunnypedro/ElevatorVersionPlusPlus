@@ -1,9 +1,10 @@
 package elevator;
 
-import building.enums.Direction;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import building.enums.Direction;
+
 
 import org.junit.Before;
 import org.junit.BeforeClass;
