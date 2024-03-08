@@ -58,7 +58,9 @@ public class Elevator implements ElevatorInterface {
    */
   private Direction direction;
 
-  private int openDoorTimer = 0;
+  private int doorOpenTimer = 0;
+
+  private int endWaitTimer = 0;
 
 
   private final boolean[] floorRequests; // true if there is a request for the floor.
@@ -85,11 +87,11 @@ public class Elevator implements ElevatorInterface {
    * @throws IllegalArgumentException if the maxFloor or maxOccupancy is out of range
    */
   public Elevator(int maxFloor, int maxOccupancy) {
-    if (maxFloor < 1 || maxFloor > 30) {
-      throw new IllegalArgumentException("maxFloor must be between 1 and 30");
+    if (maxFloor < 3 || maxFloor > 30) {
+      throw new IllegalArgumentException("maxFloor must be between 3 and 30");
     }
-    if (maxOccupancy < 1 || maxOccupancy > 20) {
-      throw new IllegalArgumentException("maxOccupancy must be between 1 and 20");
+    if (maxOccupancy < 3 || maxOccupancy > 20) {
+      throw new IllegalArgumentException("maxOccupancy must be between 3 and 20");
     }
 
     this.maxFloor = maxFloor;
@@ -112,6 +114,7 @@ public class Elevator implements ElevatorInterface {
     this.takingRequests = true;
     clearStopRequests();
     this.doorClosed = true;
+    this.doorOpenTimer = 0;
   }
 
   /**
@@ -189,6 +192,9 @@ public class Elevator implements ElevatorInterface {
       this.floorRequests[request.getStartFloor()] = true;
       this.floorRequests[request.getEndFloor()] = true;
     }
+    // if the elevator was waiting at the top or bottom
+    // set the timer to 0 and we are off to the races.
+    this.endWaitTimer = 0;
   }
 
   /**
@@ -210,16 +216,25 @@ public class Elevator implements ElevatorInterface {
    * 3. if the door is closed we will move the elevator up one floor.
    */
   public void step() {
-    if (this.outOfService) {
+    if (this.outOfService && this.currentFloor == 0 && !this.doorClosed) {
+      this.direction = Direction.STOPPED;
       return;
     }
 
     // If the door is open we decrease the door open timer and return.
-    if (this.openDoorTimer > 0) {
-      this.openDoorTimer--;
-      if (this.openDoorTimer == 0) {
+    if (this.doorOpenTimer > 0) {
+      this.doorOpenTimer--;
+      if (this.doorOpenTimer == 0) {
         this.doorClosed = true;
       }
+      return;
+    }
+
+    // if the elevator is at the top or bottom and we are waiting
+    // decrease the wait timer and return.
+    if (this.endWaitTimer > 0) {
+      this.endWaitTimer--;
+      this.takingRequests = false;
       return;
     }
 
@@ -227,31 +242,47 @@ public class Elevator implements ElevatorInterface {
     // We open the door and set the timer for 3 steps.
     if (this.floorRequests[this.currentFloor]) {
       this.doorClosed = false;
-      this.openDoorTimer = 3;
+      this.doorOpenTimer = 3;
       this.floorRequests[this.currentFloor] = false;
       return;
     }
 
+    // The logic here is as follows.
+    // if we are not at the top or the bottom we will move up or down.
+    // the top and bottom logic involves reaching this code twice.
 
-    // for the purposes of this assignment we will assume that the elevator
-    // can move one floor in one step.
+    //*********************************************************************************
+    // Reaching the top.
+    // The first time we reach the top we set the value of the floor to maxFloor - 1
+    // and we are done.
+    // then on the next call if the door has to be opened the code above will deal with
+    // that.  Once the door has opened and closed then the following code
+    // will be executed the next time.
+    // Since we are at the top we move past one and we know it is time to wait
+    // for 5 steps.
+    //*********************************************************************************
+    // the same logic applies to the bottom floor.
+    //*********************************************************************************
+
     int floorIncrement = 1;
     if (this.direction == Direction.UP) {
       this.currentFloor += floorIncrement;
       if (this.currentFloor >= this.maxFloor) {
         this.currentFloor = this.maxFloor - 1;
+        this.endWaitTimer = 5;
         this.direction = Direction.DOWN; // The elevator never stops at the top floor.
         this.takingRequests = true;
       }
     } else {
       this.currentFloor -= floorIncrement;
+      // If we
       if (this.currentFloor < 0) {
         this.currentFloor = 0;
-        this.direction = Direction.STOPPED;
+        this.endWaitTimer = 5;
+        this.direction = Direction.UP;
         this.takingRequests = true;
       }
     }
-
   }
 
   /**
@@ -263,6 +294,11 @@ public class Elevator implements ElevatorInterface {
   public String toString() {
     StringBuilder sb = new StringBuilder();
 
+    if (this.endWaitTimer > 0) {
+      sb.append(String.format("W[%d,%d]", this.endWaitTimer, this.currentFloor));
+      return sb.toString();
+    }
+
     sb.append(String.format("[%d|%s|",
         this.currentFloor,
         this.direction));
@@ -270,7 +306,7 @@ public class Elevator implements ElevatorInterface {
     if (this.doorClosed) {
       sb.append("closed]<");
     } else {
-      sb.append(String.format("open %d]<", this.openDoorTimer));
+      sb.append(String.format("open %d]<", this.doorOpenTimer));
     }
 
     for (int i = 0; i < this.maxFloor; i++) {
@@ -293,27 +329,18 @@ public class Elevator implements ElevatorInterface {
    */
   @Override
   public JSONObject toJson() {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("elevatorId", this.id);
-    jsonObject.put("currentFloor", this.currentFloor);
-    jsonObject.put("direction", this.direction);
-    JSONObject doorStatus = new JSONObject();
-    if (this.doorClosed) {
-      doorStatus.put("status", "closed");
-    } else {
-      doorStatus.put("status", "open");
-      doorStatus.put("timer", this.openDoorTimer);
-    }
-    jsonObject.put("doorStatus", doorStatus);
+    ElevatorReport elevatorReport = new ElevatorReport(
+        this.id,
+        this.currentFloor,
+        this.direction,
+        this.doorClosed,
 
-    JSONArray floorRequestsJson = new JSONArray();
-    for (int i = 0; i < this.maxFloor; i++) {
-      if (this.floorRequests[i]) {
-        floorRequestsJson.put(i);
-      }
-    }
-    jsonObject.put("floorRequests", floorRequestsJson);
-    return jsonObject;
+        this.floorRequests,
+        this.doorOpenTimer,
+        this.endWaitTimer,
+        this.outOfService);
+    return elevatorReport.toJson();
+
   }
 
   /**
@@ -350,6 +377,9 @@ public class Elevator implements ElevatorInterface {
    */
   @Override
   public void takeOutOfService() {
+    this.clearStopRequests();
+    this.direction = Direction.DOWN;
+    this.floorRequests[0] = true;
     this.outOfService = true;
   }
 

@@ -86,18 +86,21 @@ public interface ElevatorInterface {
    * If the elevator is stopped, it will not move.
    * If the elevator arrives at a floor where it is supposed to stop then it will open
    * its doors and let people out.
-   * The elevator will stop for three-step increments then it will close its doors and move on.
-   * If the elevator is moving up, and it arrives at the top floor, it will change direction.
+   * The elevator will stop for 3 steps then it will close its doors and move on.
+   * If the elevator arrives at the top floor, it will wait for 5 steps then go down.
+   * If the elevator arrives at the bottom floor, it will wait for 5 steps then go up.
    */
   public void step();
 
   /**
-   * processRequest
-   * This will tell the elevator to process these requests on the next run.
+   * processUpRequests.
+   * This will tell the elevator to process these upRequests on the next run.
+   * These are only accepted when the elevator is at the bottom floor.
    *
    * @param requests the request to add to the elevator.
    */
   public void processRequests(List<Request> requests) throws IllegalArgumentException;
+
 
   /**
    * isTakingRequests.
