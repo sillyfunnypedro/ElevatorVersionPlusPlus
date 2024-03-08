@@ -32,6 +32,9 @@ public class ElevatorTest {
   Elevator elevatorThreeFloors3Capacity;
 
 
+  /**
+   * Set up the stuff before all of the tests so we can do a static test.
+   */
   @BeforeClass
   public static void setUpClass() {
     System.out.println("Testing Elevator class");
