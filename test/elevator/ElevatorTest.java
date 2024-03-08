@@ -511,7 +511,6 @@ public class ElevatorTest {
     elevatorThreeFloors3Capacity.step();
     elevatorThreeFloors3Capacity.step();
     elevatorThreeFloors3Capacity.step();
-    elevatorThreeFloors3Capacity.step();
     assertEquals(0, elevatorThreeFloors3Capacity.getCurrentFloor());
     elevatorThreeFloors3Capacity.step();
 
@@ -651,8 +650,8 @@ public class ElevatorTest {
     for (int i = 0; i < 10; i++) {
       elevatorTenFloors10Capacity.step();
     }
-    // elevator is on floor 3
-    assertEquals(4, elevatorTenFloors10Capacity.getCurrentFloor());
+    // elevator is on floor 5
+    assertEquals(5, elevatorTenFloors10Capacity.getCurrentFloor());
 
     // elevator is not taking requests
     assertFalse(elevatorTenFloors10Capacity.isTakingRequests());
@@ -923,6 +922,56 @@ public class ElevatorTest {
     assertTrue(report.getFloorRequests()[9]);
     assertFalse(report.isDoorClosed());
     assertEquals(elevatorTenFloors10Capacity.isTakingRequests(), report.isTakingRequests());
+  }
+
+  /**
+   * Make the elevator go up and down 100000 times.
+   * This is a stress test to see if the elevator can handle a large number of requests.
+   */
+  @Test
+  public void stressTest() {
+    System.out.println("Testing: stressTest");
+    elevatorTenFloors10Capacity.start();
+
+    for (int i = 0; i < 100000; i++) {
+
+      // check that the elevator is on the ground floor
+      assertEquals(0, elevatorTenFloors10Capacity.getCurrentFloor());
+      // check that the elevator is taking requests
+      assertTrue(elevatorTenFloors10Capacity.isTakingRequests());
+
+      // wait 5 steps for the elevator to start
+      for (int j = 0; j < 5; j++) {
+        elevatorTenFloors10Capacity.step();
+      }
+
+      // step up ten floors (there are no requests)
+      for (int j = 0; j < 10; j++) {
+        elevatorTenFloors10Capacity.step();
+      }
+      // check to see if the elevator is taking requests
+      assertTrue(elevatorTenFloors10Capacity.isTakingRequests());
+      // check to see if the elevator is at the top
+      assertEquals(9, elevatorTenFloors10Capacity.getCurrentFloor());
+
+      // wait for 5 steps and see if the elevator is going down.
+      for (int j = 0; j < 5; j++) {
+        elevatorTenFloors10Capacity.step();
+      }
+      assertEquals(Direction.DOWN, elevatorTenFloors10Capacity.getDirection());
+      // check to see if the elevator is taking requests
+      assertFalse(elevatorTenFloors10Capacity.isTakingRequests());
+      // now go to the ground floor
+      for (int j = 0; j < 10; j++) {
+        elevatorTenFloors10Capacity.step();
+      }
+      // check to see if the elevator is taking requests
+      assertTrue(elevatorTenFloors10Capacity.isTakingRequests());
+      // check to see if the elevator is at the bottom
+      assertEquals(0, elevatorTenFloors10Capacity.getCurrentFloor());
+
+    }
+
   }
 
 }

@@ -211,16 +211,98 @@ public class Elevator implements ElevatorInterface {
     clearStopRequests();
     this.doorClosed = true;
     this.doorOpenTimeLeft = 0;
+    this.stopWaitTimeLeft = this.stopWaitTimeTotal;
+    this.direction = Direction.UP;
   }
 
 
   /**
+   * The step function is called to move the elevator one step.
+   * First check to see if an out of service request has been made.
+   * Second check to see if the door is open
+   * Third Check to see if the elevator is waiting at the top or bottom.
+   * Fourth check to see if there is a request at this floor.
+   */
+  public void step() {
+    // If the elevator is out of service then we need to deal with that.
+    if (this.outOfService) {
+      this.stepOutOfService();
+      return;
+    }
+
+    // If the door is open we call the stepDoorOpen function and return.
+    if (!this.doorClosed) {
+      this.stepDoorOpen();
+      return;
+    }
+
+    // If the elevator is at the top or bottom we call the
+    // stepTopOrBottom function and return.
+    if (this.stopWaitTimeLeft > 0) {
+      this.stepTopOrBottom();
+      return;
+    }
+
+    // We are not out of service,
+    // the door is closed and we are not waiting at the top or bottom.
+    // now we check to see if there is a request at this floor
+    // We open the door and set the timer for 3 steps.
+    if (this.floorRequests[this.currentFloor]) {
+      this.doorClosed = false;
+      this.doorOpenTimeLeft = this.doorOpenTimeTotal;
+      this.floorRequests[this.currentFloor] = false;
+      return;
+    }
+
+    // We are not out of service
+    // the door is closed
+    // and there is no request at this floor.
+    // We may be at the top or the bottom
+
+
+    // If we are at the bottom
+    // and the direction is down
+    // we need to set the direction to up
+    // we set the timer to this.stopWaitTimeTotal
+    if (this.currentFloor == 0 && this.direction == Direction.DOWN) {
+      this.direction = Direction.UP;
+      this.stopWaitTimeLeft = this.stopWaitTimeTotal;
+      this.takingRequests = true;
+      return;
+    }
+
+    // If we are at the top
+    // and the direction is up
+    // we need to set the direction to down
+    // we set the timer to this.stopWaitTimeTotal
+    if (this.currentFloor == this.maxFloor - 1 && this.direction == Direction.UP) {
+      this.direction = Direction.DOWN;
+      this.stopWaitTimeLeft = this.stopWaitTimeTotal;
+      this.takingRequests = true;
+      return;
+    }
+
+    // we have exhausted all of our options.
+    // We are not out of service
+    // the door is closed
+    // there is no request at this floor
+    // we are not at the top or the bottom
+    // we need to move the elevator in the direction it is currently moving.
+
+    int floorIncrement = 1;
+    if (this.direction == Direction.UP) {
+      this.currentFloor += floorIncrement;
+    } else {
+      this.currentFloor -= floorIncrement;
+    }
+  }
+
+  /**
    * Step the elevator when out of service.
-   *
    * If the elevator is on the ground floor and the door is open return
    * If the elevator is on the ground floor and the door is closed
    * then open the door.
-   *
+   * <p></p>
    * If the elevator is not on the ground floor and the door is open
    * then execute stepDoorOpen
    */
@@ -253,6 +335,9 @@ public class Elevator implements ElevatorInterface {
     this.currentFloor--;
   }
 
+  /**
+   * Process the door open step function.
+   */
   private void stepDoorOpen() {
     this.doorOpenTimeLeft--;
     if (this.doorOpenTimeLeft == 0) {
@@ -261,81 +346,12 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * The step function is called to move the elevator one step.
-   * If the elevator is moving up we will
-   * 1. check to see if there are any requests for the current floor.
-   * If there is we will open the door and set a timer for 3 steps.
-   * 2. if the door is open we will close the door after the timer expires.
-   * 3. if the door is closed we will move the elevator up one floor.
+   * Process the top or bottom step function.
    */
-  public void step() {
-    if (this.outOfService) {
-      this.stepOutOfService();
-      return;
-    }
-
-
-    // If the door is open we decrease the door open timer and return.
-    if (this.doorOpenTimeLeft > 0) {
-      this.doorOpenTimeLeft--;
-      if (this.doorOpenTimeLeft == 0) {
-        this.doorClosed = true;
-      }
-      return;
-    }
-
-    // if the elevator is at the top or bottom and we are waiting
-    // decrease the wait timer and return.
-    if (this.stopWaitTimeLeft > 0) {
-      this.stopWaitTimeLeft--;
+  private void stepTopOrBottom() {
+    this.stopWaitTimeLeft--;
+    if (this.stopWaitTimeLeft == 0) {
       this.takingRequests = false;
-      return;
-    }
-
-    // now we check to see if there is a request at this floor
-    // We open the door and set the timer for 3 steps.
-    if (this.floorRequests[this.currentFloor]) {
-      this.doorClosed = false;
-      this.doorOpenTimeLeft = 3;
-      this.floorRequests[this.currentFloor] = false;
-      return;
-    }
-
-    // The logic here is as follows.
-    // if we are not at the top or the bottom we will move up or down.
-    // the top and bottom logic involves reaching this code twice.
-
-    //*********************************************************************************
-    // Reaching the top.
-    // The first time we reach the top we set the value of the floor to maxFloor - 1
-    // and we are done.
-    // then on the next call if the door has to be opened the code above will deal with
-    // that.  Once the door has opened and closed then the following code
-    // will be executed the next time.
-    // Since we are at the top we move past one and we know it is time to wait
-    // for 5 steps.
-    //*********************************************************************************
-    // the same logic applies to the bottom floor.
-    //*********************************************************************************
-
-    int floorIncrement = 1;
-    if (this.direction == Direction.UP) {
-      this.currentFloor += floorIncrement;
-      if (this.currentFloor >= this.maxFloor) {
-        this.currentFloor = this.maxFloor - 1;
-        this.stopWaitTimeLeft = 5;
-        this.direction = Direction.DOWN; // The elevator never stops at the top floor.
-        this.takingRequests = true;
-      }
-    } else {
-      this.currentFloor -= floorIncrement;
-      // If we
-      if (this.currentFloor < 0) {
-        this.currentFloor = 0;
-        this.stopWaitTimeLeft = 5;
-        this.direction = Direction.UP;
-        this.takingRequests = true;
-      }
     }
   }
 
