@@ -35,6 +35,7 @@ public class Elevator implements ElevatorInterface {
   /************************************************************************
    * The number of steps that the door is open for.
    ************************************************************************/
+  @SuppressWarnings("FieldCanBeLocal")
   private final int doorOpenTimeTotal = 3;
 
   /************************************************************************
