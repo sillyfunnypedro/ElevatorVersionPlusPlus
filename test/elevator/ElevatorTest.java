@@ -18,7 +18,8 @@ import java.util.List;
  * A JUnit test class for the ElevatorStatus class.
  */
 public class ElevatorTest {
-
+  private static Elevator elevatorTestStatic;
+  private static Elevator elevatorTestStatic2;
   List<Request> upTenRequests;
   List<Request> upTenRequestsNotTop;
   List<Request> downTenRequests;
@@ -30,8 +31,6 @@ public class ElevatorTest {
 
   Elevator elevatorThreeFloors3Capacity;
 
-  private static Elevator elevatorTestStatic;
-  private static Elevator elevatorTestStatic2;
 
   @BeforeClass
   public static void setUpClass() {
