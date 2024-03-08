@@ -5,8 +5,6 @@ import building.enums.Direction;
 
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import scanerzus.Request;
 
 
@@ -14,61 +12,74 @@ import scanerzus.Request;
  * An implementation of the ElevatorStatus interface.
  */
 public class Elevator implements ElevatorInterface {
-  /**
-   * The total number of floors in the building.
-   */
-  private final int maxFloor;
-
-  /**
-   * The maximum number of people that can fit in the elevator.
-   */
-  private final int maxOccupancy;
-
-  /**
-   * Is the elevator taking requests.
-   */
-  private boolean takingRequests;
-
-  /**
-   * The integer that stores the static value used to initialize the elevator
-   * id.
-   * This is a unique identifier for the elevator.
-   *
-   * Added a checkstyle suppression for DeclarationOrder since it is buggy
-   */
+  /************************************************************************
+   * static value used to initialize the elevator id.
+   ************************************************************************/
   private static int newElevatorId = 0;
 
-  /**
-   * The id of the elevator.
-   * This is a unique identifier for the elevator.
-   * This is initialized using a static variable that is incremented each time
-   */
+  /************************************************************************
+   * The id of the elevator.This is read only.
+   ************************************************************************/
   private final int id = newElevatorId++;
 
+  /************************************************************************
+   * The total number of floors in the building.
+   ************************************************************************/
+  private final int maxFloor;
 
-  /**
-   * The current floor of the elevator.
-   * This is initialized to 0, which is the first floor.
-   */
+  /************************************************************************
+   * The maximum number of people that can fit in the elevator.
+   ************************************************************************/
+  private final int maxOccupancy;
+
+  /************************************************************************
+   * The number of steps that the door is open for.
+   ************************************************************************/
+  private final int doorOpenTimeTotal = 3;
+
+  /************************************************************************
+   * The number of steps that the elevator will wait at the top or bottom.
+   ************************************************************************/
+  private final int stopWaitTimeTotal = 5;
+
+  /************************************************************************
+   * The class variables that change as the elevator runs.
+   ************************************************************************/
+  private boolean takingRequests;
+
+
+  /************************************************************************
+   * The current floor of the elevator. Starts at 0.
+   ************************************************************************/
   private int currentFloor;
 
 
-  /**
+  /************************************************************************
    * The direction the elevator is moving.
-   */
+   ************************************************************************/
   private Direction direction;
 
-  private int doorOpenTimer = 0;
+  /************************************************************************
+   * The timer for the door.
+   ************************************************************************/
+  private int doorOpenTimeLeft = 0;
 
-  private int endWaitTimer = 0;
-
-
-  private final boolean[] floorRequests; // true if there is a request for the floor.
-
-  /**
+  /************************************************************************
    * The state of the door.
-   */
+   ************************************************************************/
   private boolean doorClosed = true;
+
+
+  /************************************************************************
+   * The timer for the end of the run.
+   ************************************************************************/
+  private int stopWaitTimeLeft = 0;
+
+
+  /************************************************************************
+   * The requests for the floors.
+   ************************************************************************/
+  private final boolean[] floorRequests; // true if there is a request for the floor.
 
 
   private boolean outOfService;  // start must be issued on the elevator to start it.
@@ -104,21 +115,12 @@ public class Elevator implements ElevatorInterface {
 
   }
 
-  /**
-   * Start the elevator.  This does nothing if the elevator is not
-   * on the ground floor and its doors are open.
-   */
-  @Override
-  public void start() {
-    this.outOfService = false;
-    this.takingRequests = true;
-    clearStopRequests();
-    this.doorClosed = true;
-    this.doorOpenTimer = 0;
-  }
+  /* ***********************************************************************
+   * The following methods are the getters for the ElevatorStatus interface.
+   * **********************************************************************/
 
   /**
-   * Get the current floor, this is a floating point value to allow for partial floors.
+   * Get the current floor.
    *
    * @return the current floor of the elevator
    */
@@ -185,27 +187,78 @@ public class Elevator implements ElevatorInterface {
     return this.floorRequests;
   }
 
-  private void processStopRequests(List<Request> requests) {
-    clearStopRequests();
-
-    for (Request request : requests) {
-      this.floorRequests[request.getStartFloor()] = true;
-      this.floorRequests[request.getEndFloor()] = true;
-    }
-    // if the elevator was waiting at the top or bottom
-    // set the timer to 0 and we are off to the races.
-    this.endWaitTimer = 0;
-  }
+  /* ***********************************************************************
+   * The following methods are the methods for the ElevatorStatus interface.
+   *
+   * start() - start the elevator
+   * step() - move the elevator one step
+   * processRequests() - process the requests
+   * takeOutOfService() - take the elevator out of service
+   * isTakingRequests() - is the elevator taking requests
+   * toString() - string representation of the elevator
+   * getElevatorStatus() - generate a report for the elevator in ElevatorReport format
+   *
+   * **********************************************************************/
 
   /**
-   * Clear the Floor Requests.
+   * Start the elevator.  This does nothing if the elevator is not
+   * on the ground floor and its doors are open.
    */
-  private void clearStopRequests() {
-    for (int i = 0; i < this.maxFloor; i++) {
-      this.floorRequests[i] = false;
-    }
+  @Override
+  public void start() {
+    this.outOfService = false;
+    this.takingRequests = true;
+    clearStopRequests();
+    this.doorClosed = true;
+    this.doorOpenTimeLeft = 0;
   }
 
+
+  /**
+   * Step the elevator when out of service.
+   *
+   * If the elevator is on the ground floor and the door is open return
+   * If the elevator is on the ground floor and the door is closed
+   * then open the door.
+   *
+   * If the elevator is not on the ground floor and the door is open
+   * then execute stepDoorOpen
+   */
+  private void stepOutOfService() {
+    if (this.currentFloor == 0 && !this.doorClosed) {
+      return;
+    }
+
+    //
+    if (this.currentFloor == 0) {
+      this.doorClosed = false;
+      // we can clear the floor requests now
+      this.floorRequests[this.currentFloor] = false;
+      // we can set the elevator to stopped.
+      this.direction = Direction.STOPPED;
+      return;
+    }
+
+    // at this point we know we are not on the ground floor
+    // check to see if the door is open.
+
+    if (!this.doorClosed) {
+      this.stepDoorOpen();
+
+      return;
+    }
+
+    // set the direction of the elevator to down.
+    this.direction = Direction.DOWN;
+    this.currentFloor--;
+  }
+
+  private void stepDoorOpen() {
+    this.doorOpenTimeLeft--;
+    if (this.doorOpenTimeLeft == 0) {
+      this.doorClosed = true;
+    }
+  }
 
   /**
    * The step function is called to move the elevator one step.
@@ -216,15 +269,16 @@ public class Elevator implements ElevatorInterface {
    * 3. if the door is closed we will move the elevator up one floor.
    */
   public void step() {
-    if (this.outOfService && this.currentFloor == 0 && !this.doorClosed) {
-      this.direction = Direction.STOPPED;
+    if (this.outOfService) {
+      this.stepOutOfService();
       return;
     }
 
+
     // If the door is open we decrease the door open timer and return.
-    if (this.doorOpenTimer > 0) {
-      this.doorOpenTimer--;
-      if (this.doorOpenTimer == 0) {
+    if (this.doorOpenTimeLeft > 0) {
+      this.doorOpenTimeLeft--;
+      if (this.doorOpenTimeLeft == 0) {
         this.doorClosed = true;
       }
       return;
@@ -232,8 +286,8 @@ public class Elevator implements ElevatorInterface {
 
     // if the elevator is at the top or bottom and we are waiting
     // decrease the wait timer and return.
-    if (this.endWaitTimer > 0) {
-      this.endWaitTimer--;
+    if (this.stopWaitTimeLeft > 0) {
+      this.stopWaitTimeLeft--;
       this.takingRequests = false;
       return;
     }
@@ -242,7 +296,7 @@ public class Elevator implements ElevatorInterface {
     // We open the door and set the timer for 3 steps.
     if (this.floorRequests[this.currentFloor]) {
       this.doorClosed = false;
-      this.doorOpenTimer = 3;
+      this.doorOpenTimeLeft = 3;
       this.floorRequests[this.currentFloor] = false;
       return;
     }
@@ -269,7 +323,7 @@ public class Elevator implements ElevatorInterface {
       this.currentFloor += floorIncrement;
       if (this.currentFloor >= this.maxFloor) {
         this.currentFloor = this.maxFloor - 1;
-        this.endWaitTimer = 5;
+        this.stopWaitTimeLeft = 5;
         this.direction = Direction.DOWN; // The elevator never stops at the top floor.
         this.takingRequests = true;
       }
@@ -278,70 +332,13 @@ public class Elevator implements ElevatorInterface {
       // If we
       if (this.currentFloor < 0) {
         this.currentFloor = 0;
-        this.endWaitTimer = 5;
+        this.stopWaitTimeLeft = 5;
         this.direction = Direction.UP;
         this.takingRequests = true;
       }
     }
   }
 
-  /**
-   * toString implementation.
-   *
-   * @return string representation of the elevator.
-   */
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-
-    if (this.endWaitTimer > 0) {
-      sb.append(String.format("W[%d,%d]", this.endWaitTimer, this.currentFloor));
-      return sb.toString();
-    }
-
-    sb.append(String.format("[%d|%s|",
-        this.currentFloor,
-        this.direction));
-
-    if (this.doorClosed) {
-      sb.append("closed]<");
-    } else {
-      sb.append(String.format("open %d]<", this.doorOpenTimer));
-    }
-
-    for (int i = 0; i < this.maxFloor; i++) {
-      if (this.floorRequests[i]) {
-        sb.append(String.format(" %2d", i));
-      } else {
-        sb.append(" --");
-      }
-    }
-    sb.append(">");
-
-    return sb.toString();
-
-  }
-
-  /**
-   * toJson implementation.
-   *
-   * @return json representation of the elevator.
-   */
-  @Override
-  public JSONObject toJson() {
-    ElevatorReport elevatorReport = new ElevatorReport(
-        this.id,
-        this.currentFloor,
-        this.direction,
-        this.doorClosed,
-
-        this.floorRequests,
-        this.doorOpenTimer,
-        this.endWaitTimer,
-        this.outOfService);
-    return elevatorReport.toJson();
-
-  }
 
   /**
    * Process the requests.  The Building will only give us requests
@@ -394,5 +391,67 @@ public class Elevator implements ElevatorInterface {
     return this.takingRequests;
   }
 
+
+  private void processStopRequests(List<Request> requests) {
+    clearStopRequests();
+
+    for (Request request : requests) {
+      this.floorRequests[request.getStartFloor()] = true;
+      this.floorRequests[request.getEndFloor()] = true;
+    }
+    // if the elevator was waiting at the top or bottom
+    // set the timer to 0 and we are off to the races.
+    this.stopWaitTimeLeft = 0;
+  }
+
+  /**
+   * Clear the Floor Requests.
+   */
+  private void clearStopRequests() {
+    for (int i = 0; i < this.maxFloor; i++) {
+      this.floorRequests[i] = false;
+    }
+  }
+
+  /**
+   * toString implementation.
+   *
+   * @return string representation of the elevator.
+   */
+  @Override
+  public String toString() {
+    ElevatorReport report = new ElevatorReport(
+        this.id,
+        this.currentFloor,
+        this.direction,
+        this.doorClosed,
+        this.floorRequests,
+        this.doorOpenTimeLeft,
+        this.stopWaitTimeLeft,
+        this.outOfService,
+        this.takingRequests);
+
+    return report.toString();
+  }
+
+
+  /**
+   * Generate a report for the elevator in ElevatorReport format.
+   *
+   * @return an ElevatorReport object.
+   */
+  @Override
+  public ElevatorReport getElevatorStatus() {
+    return new ElevatorReport(
+        this.id,
+        this.currentFloor,
+        this.direction,
+        this.doorClosed,
+        this.floorRequests,
+        this.doorOpenTimeLeft,
+        this.stopWaitTimeLeft,
+        this.outOfService,
+        this.takingRequests);
+  }
 
 }

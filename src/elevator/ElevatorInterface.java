@@ -111,10 +111,10 @@ public interface ElevatorInterface {
   public boolean isTakingRequests();
 
   /**
-   * This method is used to get the elevator status as a JSON object.
+   * This method is used to get the elevator status ElevatorReport.
    *
    * @return the elevator status.
    */
-  public JSONObject toJson();
+  public ElevatorReport getElevatorStatus();
 
 }

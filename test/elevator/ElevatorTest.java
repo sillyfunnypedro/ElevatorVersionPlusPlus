@@ -1,6 +1,7 @@
 package elevator;
 
 import building.enums.Direction;
+import building.enums.ElevatorStatus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -776,16 +777,12 @@ public class ElevatorTest {
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[0|v|open 3]< -- -- -- -- -- -- -- -- -- -->",
-        elevatorTenFloors10Capacity.toString());
-
-    elevatorTenFloors10Capacity.step();
-    assertEquals("[0|-|open 3]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
     for (int i = 0; i < 1000; i++) {
       elevatorTenFloors10Capacity.step();
     }
-    assertEquals("[0|-|open 3]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     // Now we put the elevator back in service
@@ -861,16 +858,12 @@ public class ElevatorTest {
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[0|v|open 3]< -- -- -- -- -- -- -- -- -- -->",
-        elevatorTenFloors10Capacity.toString());
-
-    elevatorTenFloors10Capacity.step();
-    assertEquals("[0|-|open 3]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
     for (int i = 0; i < 1000; i++) {
       elevatorTenFloors10Capacity.step();
     }
-    assertEquals("[0|-|open 3]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     // Now we put the elevator back in service
@@ -893,137 +886,43 @@ public class ElevatorTest {
   }
 
   /**
-   * Test the toJson method.
+   * Test the getElevatorStatus method.
    */
   @Test
-  public void elevatorToJson() {
-    System.out.println("Testing: elevatorToJson");
-    elevatorTestStatic2.start();
-    elevatorTestStatic2.processRequests(upThreeRequests);
-    String jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":0,\"floorRequests\":[0,1,2],"
-        + "\"direction\":\"^\"}", jsonString);
+  public void getElevatorStatus() {
+    System.out.println("Testing: getElevatorStatus");
+    elevatorTenFloors10Capacity.start();
 
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":3,\"status\":\"open\"},"
-        + "\"currentFloor\":0,\"floorRequests\":[1,2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":2,\"status\":\"open\"},"
-        + "\"currentFloor\":0,\"floorRequests\":[1,2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":1,\"status\":\"open\"},"
-        + "\"currentFloor\":0,\"floorRequests\":[1,2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":0,\"floorRequests\":[1,2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":1,\"floorRequests\":[1,2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":3,\"status\":\"open\"},"
-        + "\"currentFloor\":1,\"floorRequests\":[2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":2,\"status\":\"open\"},"
-        + "\"currentFloor\":1,\"floorRequests\":[2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":1,\"status\":\"open\"},"
-        + "\"currentFloor\":1,\"floorRequests\":[2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":1,\"floorRequests\":[2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":2,\"floorRequests\":[2],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":3,\"status\":\"open\"},"
-        + "\"currentFloor\":2,\"floorRequests\":[],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":2,\"status\":\"open\"},"
-        + "\"currentFloor\":2,\"floorRequests\":[],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":1,\"status\":\"open\"},"
-        + "\"currentFloor\":2,\"floorRequests\":[],"
-        + "\"direction\":\"^\"}", jsonString);
-
-    // elevator will Continue to the top (floor 9)
-    for (int i = 0; i < 8; i++) {
-      elevatorTestStatic2.step();
+    elevatorTenFloors10Capacity.processRequests(upTenRequests);
+    for (int i = 0; i < 6; i++) {
+      elevatorTenFloors10Capacity.step();
     }
 
-    // The elevator is on floor 9 and is waiting for 5 steps
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"^\"}", jsonString);
+    assertEquals(1, elevatorTenFloors10Capacity.getCurrentFloor());
+    assertEquals("[1|^|open 3]< -- --  2  3 --  5  6 -- --  9>",
+        elevatorTenFloors10Capacity.toString());
 
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"v\"}", jsonString);
 
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"v\"}", jsonString);
+    ElevatorReport report = elevatorTenFloors10Capacity.getElevatorStatus();
+    assertEquals("[1|^|open 3]< -- --  2  3 --  5  6 -- --  9>", report.toString());
 
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"v\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"v\"}", jsonString);
-
-    elevatorTestStatic2.step();
-    jsonString = elevatorTestStatic2.toJson().toString();
-    assertEquals("{\"elevatorId\":1,\"doorStatus\":{\"timer\":5,\"status\":\"closed\"},"
-        + "\"currentFloor\":9,\"floorRequests\":[],"
-        + "\"direction\":\"v\"}", jsonString);
+    // The data in the report should match the state of the elevator
+    assertEquals(1, report.getCurrentFloor());
+    assertEquals(Direction.UP, report.getDirection());
+    assertEquals(elevatorTenFloors10Capacity.getElevatorId(), report.getElevatorId());
+    assertEquals(10, report.getFloorRequests().length);
+    assertFalse(report.getFloorRequests()[0]);
+    assertFalse(report.getFloorRequests()[1]);
+    assertTrue(report.getFloorRequests()[2]);
+    assertTrue(report.getFloorRequests()[3]);
+    assertFalse(report.getFloorRequests()[4]);
+    assertTrue(report.getFloorRequests()[5]);
+    assertTrue(report.getFloorRequests()[6]);
+    assertFalse(report.getFloorRequests()[7]);
+    assertFalse(report.getFloorRequests()[8]);
+    assertTrue(report.getFloorRequests()[9]);
+    assertFalse(report.isDoorClosed());
+    assertEquals(elevatorTenFloors10Capacity.isTakingRequests(), report.isTakingRequests());
   }
-
 
 }

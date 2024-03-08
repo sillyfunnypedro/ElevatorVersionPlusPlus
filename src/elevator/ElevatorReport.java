@@ -8,29 +8,32 @@ import org.json.JSONObject;
  * This class is used to represent the status of the elevators.
  */
 public class ElevatorReport {
-  private int elevatorId;
-  private int currentFloor;
-  private boolean doorClosed;
-  private boolean[] floorRequests;
-  private Direction direction;
+  private final int elevatorId;
+  private final int currentFloor;
+  private final boolean doorClosed;
+  private final boolean[] floorRequests;
+  private final Direction direction;
 
-  private int doorOpenTimer;
-  private int endWaitTimer;
+  private final int doorOpenTimer;
+  private final int endWaitTimer;
 
-  private boolean outOfService;
+  private final boolean outOfService;
+
+  private final boolean isTakingRequests;
 
 
   /**
    * This constructor is used to create a new ElevatorReport object.
    *
-   * @param elevatorId    The id of the elevator.
-   * @param currentFloor  The current floor of the elevator.
-   * @param doorClosed    The status of the door.
-   * @param floorRequests The requests for the floors.
-   * @param direction     The direction of the elevator.
-   * @param doorOpenTimer The timer for the door.
-   * @param endWaitTimer  The timer for the end of the run.
-   * @param outOfService  The status of the elevator.
+   * @param elevatorId       The id of the elevator.
+   * @param currentFloor     The current floor of the elevator.
+   * @param doorClosed       The status of the door.
+   * @param floorRequests    The requests for the floors.
+   * @param direction        The direction of the elevator.
+   * @param doorOpenTimer    The timer for the door.
+   * @param endWaitTimer     The timer for the end of the run.
+   * @param outOfService     The status of the elevator.
+   * @param isTakingRequests Is the elevator taking requests.
    */
   public ElevatorReport(int elevatorId,
                         int currentFloor,
@@ -40,7 +43,8 @@ public class ElevatorReport {
 
                         int doorOpenTimer,
                         int endWaitTimer,
-                        boolean outOfService) {
+                        boolean outOfService,
+                        boolean isTakingRequests) {
     this.elevatorId = elevatorId;
     this.currentFloor = currentFloor;
     this.doorClosed = doorClosed;
@@ -49,35 +53,9 @@ public class ElevatorReport {
     this.doorOpenTimer = doorOpenTimer;
     this.endWaitTimer = endWaitTimer;
     this.outOfService = outOfService;
+    this.isTakingRequests = isTakingRequests;
   }
 
-  /**
-   * This constructor is used to create a new ElevatorReport object.
-   *
-   * @param elevatorJson the json object representing the elevator.
-   */
-  public ElevatorReport(JSONObject elevatorJson) {
-    this.elevatorId = elevatorJson.getInt("elevatorId");
-    this.currentFloor = elevatorJson.getInt("currentFloor");
-    this.direction = Direction.valueOf(elevatorJson.getString("direction"));
-
-    // the door status is an object
-    JSONObject doorStatus = elevatorJson.getJSONObject("doorStatus");
-    if (doorStatus.getString("status").equals("closed")) {
-      this.doorClosed = true;
-      this.doorOpenTimer = 0;
-    } else {
-      this.doorClosed = false;
-      this.doorOpenTimer = doorStatus.getInt("timer");
-    }
-
-    // make an array of floorRequests, only list the true ones
-    JSONArray floorRequestsJson = elevatorJson.getJSONArray("floorRequests");
-    this.floorRequests = new boolean[floorRequestsJson.length()];
-    for (int i = 0; i < floorRequestsJson.length(); i++) {
-      this.floorRequests[i] = true;
-    }
-  }
 
   // getters, no setters
 
@@ -153,50 +131,51 @@ public class ElevatorReport {
     return outOfService;
   }
 
+
   /**
-   * This method is used to get the status of the elevator.
+   * Is the elevator taking requests.
    *
-   * @return The status of the elevator.
+   * @return is the elevator taking requests.
    */
-  public boolean getOutOfService() {
-    return outOfService;
+  public boolean isTakingRequests() {
+    return isTakingRequests;
   }
 
   /**
-   * This method is used to get the JSON representation.
+   * toString method for the ElevatorReport.
    *
-   * @return The status of the elevator as JSON object.
+   * @return the string representation of the ElevatorReport.
    */
-  public JSONObject toJson() {
-    JSONObject elevatorJson = new JSONObject();
-    elevatorJson.put("elevatorId", this.elevatorId);
-    elevatorJson.put("currentFloor", this.currentFloor);
-    elevatorJson.put("direction", this.direction.toString());
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
 
-    // the door status is an object
-    JSONObject doorStatus = new JSONObject();
-    if (this.doorClosed) {
-      doorStatus.put("status", "closed");
-    } else {
-      doorStatus.put("status", "open");
-      doorStatus.put("timer", this.doorOpenTimer);
+    if (this.endWaitTimer > 0) {
+      sb.append(String.format("W[%d,%d]", this.endWaitTimer, this.currentFloor));
+      return sb.toString();
     }
-    elevatorJson.put("doorStatus", doorStatus);
 
+    sb.append(String.format("[%d|%s|",
+        this.currentFloor,
+        this.direction));
 
-    // make an array of floorRequests, only list the true ones
-    JSONArray floorRequestsJson = new JSONArray();
+    if (this.doorClosed) {
+      sb.append("closed]<");
+    } else {
+      sb.append(String.format("open %d]<", this.doorOpenTimer));
+    }
+
     for (int i = 0; i < this.floorRequests.length; i++) {
       if (this.floorRequests[i]) {
-        floorRequestsJson.put(i);
+        sb.append(String.format(" %2d", i));
+      } else {
+        sb.append(" --");
       }
     }
-    elevatorJson.put("floorRequests", floorRequestsJson);
-    //elevatorJson.put("endWaitTimer", this.endWaitTimer);
-    //elevatorJson.put("outOfService", this.outOfService);
+    sb.append(">");
 
+    return sb.toString();
 
-    return elevatorJson;
   }
 
   /**
@@ -234,6 +213,9 @@ public class ElevatorReport {
     if (this.direction != that.direction) {
       return false;
     }
+    if (this.isTakingRequests != that.isTakingRequests) {
+      return false;
+    }
     for (int i = 0; i < this.floorRequests.length; i++) {
       if (this.floorRequests[i] != that.floorRequests[i]) {
         return false;
@@ -254,12 +236,11 @@ public class ElevatorReport {
     result = 31 * result + this.doorOpenTimer;
     result = 31 * result + this.endWaitTimer;
     result = 31 * result + (this.outOfService ? 1 : 0);
+    result = 31 * result + (this.isTakingRequests ? 1 : 0);
     result = 31 * result + this.direction.hashCode();
     for (boolean floorRequest : this.floorRequests) {
       result = 31 * result + (floorRequest ? 1 : 0);
     }
     return result;
   }
-
-
 }

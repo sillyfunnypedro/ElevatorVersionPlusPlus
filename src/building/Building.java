@@ -147,7 +147,7 @@ public class Building implements BuildingInterface {
     JSONArray elevatorStatusJson = new JSONArray();
 
     for (ElevatorInterface elevator : this.elevators) {
-      elevatorStatusJson.put(elevator.toJson());
+      //elevatorStatusJson.put(elevator.toJson());
     }
 
     jsonObject.put("elevatorStatus", elevatorStatusJson);
