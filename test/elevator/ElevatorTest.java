@@ -9,10 +9,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import scanerzus.Request;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import scanerzus.Request;
+
 
 /**
  * A JUnit test class for the ElevatorStatus class.
