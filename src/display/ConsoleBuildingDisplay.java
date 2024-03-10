@@ -10,6 +10,7 @@ import scanerzus.Request;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -183,7 +184,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
     if (this.updateHandler != null) {
       BuildingReport buildingStatus = this.updateHandler.handleRequest();
       String[] displayArray = computeElevatorDisplayArray(buildingStatus);
-      System.out.println(buildingStatus.toString());
+      System.out.println(BuildingDisplay(buildingStatus));
     }
   }
 
@@ -274,4 +275,84 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   public void displayPrompt() {
     System.out.print("[s steps], [CR] one step, [r start end] [h] halt [c] continue [q] quit > ");
   }
+
+
+  private String centreString(String s, int width) {
+    int leftPadding = (width - 2 - s.length()) / 2;
+    int rightPadding = width - leftPadding - s.length();
+    return "*" + " ".repeat(leftPadding) + s + " ".repeat(rightPadding) + "*";
+  }
+
+  private String leftString(String s, int width) {
+    return "* " + s + " ".repeat(width - s.length() - 1) + "*";
+  }
+
+  private String bar(int width) {
+    return "*".repeat(width) + "\n";
+  }
+
+  private String requestsToString(String title, List<Request> requests) {
+    StringBuilder sb = new StringBuilder();
+    StringBuilder line = new StringBuilder();
+    line.append(title);
+    line.append(" ");
+    int width = 76;
+
+    for (Request request : requests) {
+      if (line.length() + request.toString().length() > width) {
+        sb.append(centreString(line.toString(), 78));
+        sb.append("\n");
+        line = new StringBuilder();
+      }
+      line.append(request.toString());
+      line.append(" ");
+
+    }
+    if (line.length() > 0) {
+      sb.append(leftString(line.toString(), 78));
+      sb.append("\n");
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Building Display method for the BuildingReport.
+   *
+   * @return the string representation of the BuildingReport
+   */
+
+  private String BuildingDisplay(BuildingReport buildingReport) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("\033[H\033[2J");
+    sb.append(this.bar(80));
+
+
+    String title = String.format("Floors: %d, Elevators: %d, Capacity: %d",
+        buildingReport.getNumFloors(),
+        buildingReport.getNumElevators(),
+        buildingReport.getElevatorCapacity());
+    sb.append(centreString(title, 78));
+    sb.append("\n");
+    sb.append(this.bar(80));
+    sb.append(this.requestsToString("Up Requests",
+        buildingReport.getUpRequests()));
+    sb.append(this.requestsToString("Down Requests",
+        buildingReport.getDownRequests()));
+
+    sb.append(this.bar(80));
+    sb.append(this.centreString("Elevator Status", 78));
+    sb.append("\n");
+    // add the elevator status
+    for (int i = 0; i < buildingReport.getElevatorReports().length; i++) {
+      String elevatorStatus = String.format("Elevator %d: %s", i,
+          buildingReport.getElevatorReports()[i].toString());
+      sb.append(this.leftString(elevatorStatus, 78));
+      sb.append("\n");
+    }
+    sb.append(this.bar(80));
+
+
+    return sb.toString();
+  }
+
 }
