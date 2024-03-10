@@ -1,5 +1,8 @@
-package building;
+package controller;
 
+import building.Building;
+import controller.BuildingControllerInterface;
+import display.BuildingDisplayInterface;
 import scanerzus.Request;
 
 /**
@@ -25,9 +28,19 @@ public class BuildingController implements BuildingControllerInterface {
     display.setRequestListener(this::processRequest);
 
     display.setStepListener(this::step);
-    building.start();
+
+    building.start(true);
 
   }
+
+  /**
+   * This method is used to step the building.
+   * This can be used to simulate the building
+   */
+  private void step() {
+    building.step();
+  }
+
 
   /**
    * This method is used to process a request.
@@ -38,14 +51,6 @@ public class BuildingController implements BuildingControllerInterface {
     building.addRequest(request);
   }
 
-
-  /**
-   * This method is used to step the building.
-   * This can be used to simulate the building
-   */
-  private void step() {
-    building.step();
-  }
 
   @Override
   public void go() {

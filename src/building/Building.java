@@ -3,6 +3,7 @@ package building;
 import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
 import elevator.ElevatorInterface;
+import elevator.ElevatorReport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,11 +78,18 @@ public class Building implements BuildingInterface {
    * This method is used to start the building elevator system.
    */
   @Override
-  public void start() {
+  public void start(boolean startElevators) {
     // for all of the elevators in the building, start them.
-    for (ElevatorInterface elevator : this.elevators) {
-      elevator.start();
+    if (startElevators) {
+      for (ElevatorInterface elevator : this.elevators) {
+        elevator.start();
+      }
+      return;
     }
+    for (ElevatorInterface elevator : this.elevators) {
+      elevator.takeOutOfService();
+    }
+
   }
 
   /**
@@ -120,40 +128,21 @@ public class Building implements BuildingInterface {
    * @return String of the JSON object.
    */
   @Override
-  public JSONObject getElevatorSystemStatus() {
+  public BuildingReport getElevatorSystemStatus() {
 
-
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("numElevators", this.elevators.length);
-    jsonObject.put("numFloors", this.numberOfFloors);
-    jsonObject.put("elevatorCapacity", this.elevatorCapacity);
-
-
-    // make an array of upRequests
-    JSONArray inputRequestsJson = new JSONArray();
-    for (Request request : this.upRequests) {
-      inputRequestsJson.put(request.toJson());
-    }
-    jsonObject.put("upRequests", inputRequestsJson);
-
-    // make an array of downRequests
-    JSONArray downRequestsJson = new JSONArray();
-    for (Request request : this.downRequests) {
-      downRequestsJson.put(request.toJson());
-    }
-    jsonObject.put("downRequests", downRequestsJson);
-
-    // make an array of elevator status
-    JSONArray elevatorStatusJson = new JSONArray();
-
-    for (ElevatorInterface elevator : this.elevators) {
-      //elevatorStatusJson.put(elevator.toJson());
+    ElevatorReport[] elevatorReports = new ElevatorReport[this.elevators.length];
+    for (int i = 0; i < this.elevators.length; i++) {
+      elevatorReports[i] = this.elevators[i].getElevatorStatus();
     }
 
-    jsonObject.put("elevatorStatus", elevatorStatusJson);
+    BuildingReport buildingReport = new BuildingReport(this.numberOfFloors,
+        this.numberOfElevators,
+        this.elevatorCapacity,
+        elevatorReports,
+        this.upRequests,
+        this.downRequests);
 
-    return jsonObject;
-
+    return buildingReport;
   }
 
   /**
@@ -205,7 +194,7 @@ public class Building implements BuildingInterface {
    * Only elevators on the ground floor and top floor will be considered.
    */
   private void distributeRequests() {
-    if (this.upRequests.isEmpty()) {
+    if (this.upRequests.isEmpty() && this.downRequests.isEmpty()) {
       return;
     }
 

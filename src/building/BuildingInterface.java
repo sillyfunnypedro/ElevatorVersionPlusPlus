@@ -30,34 +30,12 @@ public interface BuildingInterface {
 
   /**
    * Start the building elevator system.
-   * This method is used to start the building elevator system.
+   * This method is used to start the building elevator system.  If the startElevators
+   * parameter is true, then the elevators will be started.  If the startElevators
+   * parameter is false, then the elevators will not be started.
    */
-  public void start();
+  public void start(boolean startElevators);
 
-
-
-  /* For a building with 4 floors and 1 elevator, the JSON object returned by getElevatorSystemStatus
-   * would look like this:
-   *
-  {
-  "numElevators": 1,
-  "buildingStatus: "running",
-  "inputRequests": [],
-  "elevatorStatus": [{
-    "elevatorId": 0,
-    "doorStatus": "closed",
-    "currentFloor": 0,
-    "floorRequests": [
-      0,
-      1,
-      2
-    ],
-    "direction": "STOPPED"
-  }],
-  "numFloors": 4,
-  "elevatorCapacity": 3
-}
-   */
 
   /**
    * This method is used to get the elevator system status.
@@ -65,7 +43,7 @@ public interface BuildingInterface {
    *
    * @return the elevator system status
    */
-  JSONObject getElevatorSystemStatus();
+  BuildingReport getElevatorSystemStatus();
 
   /**
    * This method is used to add a request to the building.

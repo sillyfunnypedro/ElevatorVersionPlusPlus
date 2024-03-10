@@ -2,9 +2,9 @@ package main;
 
 
 import building.Building;
-import building.BuildingController;
-import building.BuildingDisplayInterface;
-import building.ConsoleBuildingDisplay;
+import controller.BuildingController;
+import display.BuildingDisplayInterface;
+import display.ConsoleBuildingDisplay;
 
 /**
  * The driver for the elevator system.
@@ -13,7 +13,7 @@ import building.ConsoleBuildingDisplay;
  * <p>
  * It provides a user interface to the elevator system.
  */
-public class Main {
+public class MainConsole {
 
   /**
    * The main method for the elevator system.
@@ -25,9 +25,9 @@ public class Main {
 
     // the number of floors, the number of elevators, and the number of people.
 
-    final int numFloors = 4;
-    final int numElevators = 1;
-    final int numPeople = 2;
+    final int numFloors = 10;
+    final int numElevators = 8;
+    final int numPeople = 3;
 
 
     Building building = new Building(numFloors, numElevators, numPeople);

@@ -1,4 +1,4 @@
-package building;
+package controller;
 
 /**
  * This interface is used to define the methods that the controller

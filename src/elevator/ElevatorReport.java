@@ -149,7 +149,7 @@ public class ElevatorReport {
     StringBuilder sb = new StringBuilder();
 
     if (this.endWaitTimer > 0) {
-      sb.append(String.format("W[%d,%d]", this.endWaitTimer, this.currentFloor));
+      sb.append(String.format("Waiting[Floor %d, Time %d]", this.currentFloor, this.endWaitTimer));
       return sb.toString();
     }
 

@@ -1,6 +1,6 @@
 package building.handlers;
 
-import org.json.JSONObject;
+import building.BuildingReport;
 
 /**
  * This interface is used to represent the update handler.
@@ -8,5 +8,5 @@ import org.json.JSONObject;
  */
 @FunctionalInterface
 public interface UpdateHandler {
-  public JSONObject handleRequest();
+  public BuildingReport handleRequest();
 }
