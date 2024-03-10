@@ -158,9 +158,9 @@ public class ElevatorReport {
         this.direction));
 
     if (this.doorClosed) {
-      sb.append("closed]<");
+      sb.append("C  ]<");
     } else {
-      sb.append(String.format("open %d]<", this.doorOpenTimer));
+      sb.append(String.format("O %d]<", this.doorOpenTimer));
     }
 
     for (int i = 0; i < this.floorRequests.length; i++) {

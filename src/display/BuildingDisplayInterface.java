@@ -1,6 +1,7 @@
 package display;
 
 import building.handlers.RequestHandler;
+import building.handlers.StartHandler;
 import building.handlers.StepHandler;
 import building.handlers.UpdateHandler;
 
@@ -14,6 +15,8 @@ public interface BuildingDisplayInterface {
   public void setUpdateListener(UpdateHandler updateHandler);
 
   public void setStepListener(StepHandler stepHandler);
+
+  public void setStartListener(StartHandler startHandler);
 
 
   public void start();

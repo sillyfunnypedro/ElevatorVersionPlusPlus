@@ -393,8 +393,9 @@ public class Elevator implements ElevatorInterface {
   public void takeOutOfService() {
     this.clearStopRequests();
     this.direction = Direction.DOWN;
-    this.floorRequests[0] = true;
+
     this.outOfService = true;
+    this.stopWaitTimeLeft = 0;
   }
 
   /**

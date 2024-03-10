@@ -83,12 +83,19 @@ public class Building implements BuildingInterface {
     if (startElevators) {
       for (ElevatorInterface elevator : this.elevators) {
         elevator.start();
+        this.elevatorsStatus = ElevatorSystemStatus.running;
       }
       return;
     }
     for (ElevatorInterface elevator : this.elevators) {
       elevator.takeOutOfService();
+      this.elevatorsStatus = ElevatorSystemStatus.outOfService;
+      // delete the requests
+      this.upRequests.clear();
+      this.downRequests.clear();
+
     }
+
 
   }
 
@@ -140,7 +147,8 @@ public class Building implements BuildingInterface {
         this.elevatorCapacity,
         elevatorReports,
         this.upRequests,
-        this.downRequests);
+        this.downRequests,
+        this.elevatorsStatus);
 
     return buildingReport;
   }
@@ -152,6 +160,11 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void addRequest(Request request) {
+    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService) {
+      throw new IllegalStateException("Elevator system is out of service");
+    }
+    
+
     if (request == null) {
       throw new IllegalArgumentException("Request cannot be null");
     }

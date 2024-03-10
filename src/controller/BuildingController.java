@@ -29,6 +29,8 @@ public class BuildingController implements BuildingControllerInterface {
 
     display.setStepListener(this::step);
 
+    display.setStartListener(this.building::start);
+
     building.start(true);
 
   }

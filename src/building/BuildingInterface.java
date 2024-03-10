@@ -33,6 +33,9 @@ public interface BuildingInterface {
    * This method is used to start the building elevator system.  If the startElevators
    * parameter is true, then the elevators will be started.  If the startElevators
    * parameter is false, then the elevators will not be started.
+   *
+   * @param startElevators if true, then the elevators will be started.
+   *                       If false, then the elevators will be stopped.
    */
   public void start(boolean startElevators);
 

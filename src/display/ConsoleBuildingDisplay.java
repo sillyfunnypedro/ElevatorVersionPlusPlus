@@ -1,16 +1,13 @@
 package display;
 
 import building.handlers.RequestHandler;
+import building.handlers.StartHandler;
 import building.handlers.StepHandler;
 import building.handlers.UpdateHandler;
 import building.BuildingReport;
 
-import elevator.ElevatorReport;
 import scanerzus.Request;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -26,6 +23,8 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   private UpdateHandler updateHandler = null;
 
   private StepHandler stepHandler = null;
+
+  private StartHandler startHandler = null;
 
 
   public ConsoleBuildingDisplay() {
@@ -52,6 +51,16 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   @Override
   public void setUpdateListener(UpdateHandler updateHandler) {
     this.updateHandler = updateHandler;
+  }
+
+  /**
+   * This method is used to set the start listener.
+   *
+   * @param startHandler the start handler
+   */
+  @Override
+  public void setStartListener(StartHandler startHandler) {
+    this.startHandler = startHandler;
   }
 
   /**
@@ -89,9 +98,6 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           runStep(steps);
           break;
 
-        case "q":
-          System.out.println("Quitting the simulation");
-          return;
 
         case "r":
           if (this.requestHandler != null) {
@@ -99,7 +105,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
             int toFloor = Integer.parseInt(command[2]);
             try {
               this.requestHandler.handleRequest(new Request(fromFloor, toFloor));
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | IllegalStateException e) {
               System.out.println("Request was rejected with the following message: \n\n\t"
                   + e.getMessage());
               // wait for a key press
@@ -110,16 +116,24 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           break;
 
         case "h":
-          if (this.stepHandler != null) {
+          if (this.startHandler != null) {
+            this.startHandler.requestHandler(false);
             System.out.println("Halting the operations of the building");
           }
           break;
 
         case "c":
-          if (this.stepHandler != null) {
+          if (this.startHandler != null) {
+            this.startHandler.requestHandler(true);
             System.out.println("Continuing the operations of the building");
           }
           break;
+
+
+        case "q":
+          System.out.println("Quitting the simulation");
+          return;
+
 
         default:
           // do nothing
@@ -133,11 +147,11 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   private void detailedDisplay(Scanner scanner) {
     System.out.println("Building Display");
     System.out.println("Enter one of the following commands: ");
-    System.out.println("s: step the building. (r");
+    System.out.println("s: <steps> step the building by <steps> (max 100)");
     System.out.println("q: quit the simulation.");
     System.out.println("h: halt the operations of the building.");
     System.out.println("c: continue the operations of the building.");
-    System.out.println("r fromFloor, toFloor: request an elevator from fromFloor to toFloor.");
+    System.out.println("r: fromFloor, toFloor: request an elevator from fromFloor to toFloor.");
     System.out.println("press enter to continue");
 
     scanner.nextLine();
@@ -145,23 +159,13 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   }
 
   private void runStep(int steps) {
-
-    // add a keyEvent handler
-    KeyEventDispatcher keyEventDispatcher = new KeyEventDispatcher() {
-      @Override
-      public boolean dispatchKeyEvent(KeyEvent e) {
-        if (e.getID() == KeyEvent.KEY_PRESSED) {
-          if (e.getKeyCode() == KeyEvent.VK_EQUALS) {
-            // stop the simulation
-            System.out.println("Stopping the simulation");
-            return false;
-          }
-        }
-        return false;
-      }
-    };
-
-    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(keyEventDispatcher);
+    if (steps > 100) {
+      System.out.println("The number of steps is too large.  The maximum number of steps is 100");
+      System.out.println("press enter to continue");
+      Scanner scanner = new Scanner(System.in);
+      scanner.nextLine();
+      return;
+    }
 
     for (int i = 0; i < steps; i++) {
       if (this.stepHandler != null) {
@@ -172,7 +176,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
         }
 
         try {
-          Thread.sleep(100);
+          Thread.sleep(50);
         } catch (InterruptedException e) {
           return;
         }
@@ -183,8 +187,10 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   private void updateDisplay() {
     if (this.updateHandler != null) {
       BuildingReport buildingStatus = this.updateHandler.handleRequest();
-      String[] displayArray = computeElevatorDisplayArray(buildingStatus);
-      System.out.println(BuildingDisplay(buildingStatus));
+
+      String buildingDisplay = new AsciiBuildingDisplay().display(buildingStatus);
+
+      System.out.println(buildingDisplay);
     }
   }
 
@@ -220,8 +226,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           }
         }
 
-      case 'q':
-        return new String[]{"q"};
+
       case 'r':
         parts = input.split(" ");
         if (parts.length != 3) {
@@ -238,6 +243,16 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
             return new String[]{"s", "1"};
           }
         }
+
+      case 'h':
+        return new String[]{"h"};
+
+      case 'c':
+        return new String[]{"c"};
+
+      case 'q':
+        return new String[]{"q"};
+
       default:
         System.out.println("Invalid input");
         System.out.println("The elevators will all execute a step");
@@ -246,113 +261,9 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   }
 
 
-  /**
-   * Compute the elevator display array.
-   * This method is used to compute the display array for the elevators.
-   */
-  private String[] computeElevatorDisplayArray(BuildingReport buildingStatus) {
-    ElevatorReport[] elevatorReports = buildingStatus.getElevatorReports();
-
-    int numFloors = buildingStatus.getNumFloors();
-    String[] displayArray = new String[numFloors];
-
-    for (int floor = numFloors - 1; floor >= 0; floor--) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(String.format("%2d", floor));
-      for (ElevatorReport elevatorReport : elevatorReports) {
-        if (elevatorReport.getCurrentFloor() == floor) {
-          sb.append(String.format("%2d", elevatorReport.getCurrentFloor()));
-        } else {
-          sb.append("  ");
-        }
-      }
-      displayArray[floor] = sb.toString();
-    }
-
-    return displayArray;
-  }
-
   public void displayPrompt() {
     System.out.print("[s steps], [CR] one step, [r start end] [h] halt [c] continue [q] quit > ");
   }
 
-
-  private String centreString(String s, int width) {
-    int leftPadding = (width - 2 - s.length()) / 2;
-    int rightPadding = width - leftPadding - s.length();
-    return "*" + " ".repeat(leftPadding) + s + " ".repeat(rightPadding) + "*";
-  }
-
-  private String leftString(String s, int width) {
-    return "* " + s + " ".repeat(width - s.length() - 1) + "*";
-  }
-
-  private String bar(int width) {
-    return "*".repeat(width) + "\n";
-  }
-
-  private String requestsToString(String title, List<Request> requests) {
-    StringBuilder sb = new StringBuilder();
-    StringBuilder line = new StringBuilder();
-    line.append(title);
-    line.append(" ");
-    int width = 76;
-
-    for (Request request : requests) {
-      if (line.length() + request.toString().length() > width) {
-        sb.append(centreString(line.toString(), 78));
-        sb.append("\n");
-        line = new StringBuilder();
-      }
-      line.append(request.toString());
-      line.append(" ");
-
-    }
-    if (line.length() > 0) {
-      sb.append(leftString(line.toString(), 78));
-      sb.append("\n");
-    }
-    return sb.toString();
-  }
-
-  /**
-   * Building Display method for the BuildingReport.
-   *
-   * @return the string representation of the BuildingReport
-   */
-
-  private String BuildingDisplay(BuildingReport buildingReport) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("\033[H\033[2J");
-    sb.append(this.bar(80));
-
-
-    String title = String.format("Floors: %d, Elevators: %d, Capacity: %d",
-        buildingReport.getNumFloors(),
-        buildingReport.getNumElevators(),
-        buildingReport.getElevatorCapacity());
-    sb.append(centreString(title, 78));
-    sb.append("\n");
-    sb.append(this.bar(80));
-    sb.append(this.requestsToString("Up Requests",
-        buildingReport.getUpRequests()));
-    sb.append(this.requestsToString("Down Requests",
-        buildingReport.getDownRequests()));
-
-    sb.append(this.bar(80));
-    sb.append(this.centreString("Elevator Status", 78));
-    sb.append("\n");
-    // add the elevator status
-    for (int i = 0; i < buildingReport.getElevatorReports().length; i++) {
-      String elevatorStatus = String.format("Elevator %d: %s", i,
-          buildingReport.getElevatorReports()[i].toString());
-      sb.append(this.leftString(elevatorStatus, 78));
-      sb.append("\n");
-    }
-    sb.append(this.bar(80));
-
-
-    return sb.toString();
-  }
 
 }
