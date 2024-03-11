@@ -79,6 +79,11 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void start(boolean startElevators) {
+    if (this.elevatorsStatus == ElevatorSystemStatus.running) {
+      return;
+    }
+
+
     // for all of the elevators in the building, start them.
     if (startElevators) {
       for (ElevatorInterface elevator : this.elevators) {
@@ -87,9 +92,11 @@ public class Building implements BuildingInterface {
       }
       return;
     }
+
+    // for all of the elevators in the building, stop them.
     for (ElevatorInterface elevator : this.elevators) {
       elevator.takeOutOfService();
-      this.elevatorsStatus = ElevatorSystemStatus.outOfService;
+      this.elevatorsStatus = ElevatorSystemStatus.stopping;
       // delete the requests
       this.upRequests.clear();
       this.downRequests.clear();
@@ -142,6 +149,7 @@ public class Building implements BuildingInterface {
       elevatorReports[i] = this.elevators[i].getElevatorStatus();
     }
 
+
     BuildingReport buildingReport = new BuildingReport(this.numberOfFloors,
         this.numberOfElevators,
         this.elevatorCapacity,
@@ -160,10 +168,11 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void addRequest(Request request) {
-    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService) {
-      throw new IllegalStateException("Elevator system is out of service");
+    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService ||
+        this.elevatorsStatus == ElevatorSystemStatus.stopping) {
+      throw new IllegalStateException("Elevator system not accepting requests.");
     }
-    
+
 
     if (request == null) {
       throw new IllegalArgumentException("Request cannot be null");
@@ -196,9 +205,31 @@ public class Building implements BuildingInterface {
    */
   @Override
   public void step() {
-    this.distributeRequests();
+    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService) {
+      return;
+    }
+
+    // If we are stopping then we do not distribute requests.
+    if (this.elevatorsStatus != ElevatorSystemStatus.stopping) {
+      this.distributeRequests();
+    }
+
     for (ElevatorInterface elevator : this.elevators) {
       elevator.step();
+    }
+
+    // if we are stopping and all the elevators are on the ground floor then we are out of service.
+    if (this.elevatorsStatus == ElevatorSystemStatus.stopping) {
+      boolean allElevatorsOnGroundFloor = true;
+      for (ElevatorInterface elevator : this.elevators) {
+        if (elevator.getCurrentFloor() != 0) {
+          allElevatorsOnGroundFloor = false;
+          break;
+        }
+      }
+      if (allElevatorsOnGroundFloor) {
+        this.elevatorsStatus = ElevatorSystemStatus.outOfService;
+      }
     }
   }
 

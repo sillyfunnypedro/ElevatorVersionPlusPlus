@@ -129,6 +129,38 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           }
           break;
 
+        case "t":
+          // the second parameter is the number random requests to generate
+          int requests = Integer.parseInt(command[1]);
+          // no more than 10 requests
+
+          // get the number of floors in the building
+          BuildingReport buildingReport = this.updateHandler.handleRequest();
+          int numFloors = buildingReport.getNumFloors();
+          for (int i = 0; i < requests; i++) {
+            int fromFloor = (int) (Math.random() * numFloors);
+            int toFloor = (int) (Math.random() * numFloors);
+            if (fromFloor == toFloor) {
+              continue;
+            }
+            try {
+              this.requestHandler.handleRequest(new Request(fromFloor, toFloor));
+            } catch (IllegalArgumentException | IllegalStateException e) {
+              System.out.println("Request was rejected with the following message: \n\n\t"
+                  + e.getMessage());
+              System.out.println("No further requests will be generated");
+              System.out.println("c will resume the operations of the building");
+              // wait for a key press
+              System.out.println("\nPress enter to continue");
+              scanner.nextLine();
+              break;
+            }
+            this.requestHandler.handleRequest(new Request(fromFloor, toFloor));
+
+          }
+
+          break;
+
 
         case "q":
           System.out.println("Quitting the simulation");
@@ -241,6 +273,20 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
             System.out.println("Invalid input");
             System.out.println("The elevators will all execute a step");
             return new String[]{"s", "1"};
+          }
+        }
+      case 't':
+        parts = input.split(" ");
+        if (parts.length == 1) {
+          return new String[]{"t", "1"};
+        } else {
+          // we will try to get the number.
+          // if it is not a number we will default to 1
+          try {
+            int requests = Integer.parseInt(parts[1]);
+            return new String[]{"t", Integer.toString(requests)};
+          } catch (NumberFormatException e) {
+            return new String[]{"t", "1"};
           }
         }
 

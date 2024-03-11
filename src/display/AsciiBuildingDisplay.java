@@ -1,6 +1,7 @@
 package display;
 
 import building.BuildingReport;
+import building.enums.ElevatorSystemStatus;
 import elevator.ElevatorReport;
 import scanerzus.Request;
 
@@ -70,9 +71,30 @@ public class AsciiBuildingDisplay {
         buildingReport.getNumFloors(),
         buildingReport.getNumElevators(),
         buildingReport.getElevatorCapacity());
+
+
     sb.append(centreString(title, 78));
     sb.append("\n");
+
+    ElevatorSystemStatus sysStatus = buildingReport.getSystemStatus();
+
+    switch (sysStatus) {
+      case stopping:
+        sb.append(centreString("Elevator System Stopping", 78));
+
+        break;
+      case outOfService:
+        sb.append(centreString("Elevator System Out of Service", 78));
+        break;
+      case running:
+        sb.append(centreString("Elevator System Running", 78));
+        break;
+      default:
+        break;
+    }
+    sb.append("\n");
     sb.append(this.bar(80));
+
     sb.append(this.requestsToString("Up Requests",
         buildingReport.getUpRequests()));
     sb.append(this.requestsToString("Down Requests",

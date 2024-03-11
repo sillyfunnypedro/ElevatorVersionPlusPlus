@@ -148,6 +148,12 @@ public class ElevatorReport {
   public String toString() {
     StringBuilder sb = new StringBuilder();
 
+    // if the elevator is out of service and on the ground floor
+    if (this.outOfService && this.currentFloor == 0) {
+      sb.append(String.format("Out of Service[Floor %d]", this.currentFloor));
+      return sb.toString();
+    }
+
     if (this.endWaitTimer > 0) {
       sb.append(String.format("Waiting[Floor %d, Time %d]", this.currentFloor, this.endWaitTimer));
       return sb.toString();
