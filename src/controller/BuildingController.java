@@ -1,7 +1,6 @@
 package controller;
 
 import building.Building;
-import controller.BuildingControllerInterface;
 import display.BuildingDisplayInterface;
 import scanerzus.Request;
 
@@ -23,15 +22,17 @@ public class BuildingController implements BuildingControllerInterface {
     this.display = display;
 
     // there are two call backs that must be registered
-    display.setUpdateListener(this.building::getElevatorSystemStatus);
+    display.setUpdateListener(this.building::getStatusElevatorSystem);
 
     display.setRequestListener(this::processRequest);
 
     display.setStepListener(this::step);
 
-    display.setStartListener(this.building::start);
+    display.setStartListener(this.building::startElevatorSystem);
 
-    building.start(true);
+    display.setStopListener(this.building::stopElevatorSystem);
+
+    building.startElevatorSystem();
 
   }
 
@@ -40,7 +41,7 @@ public class BuildingController implements BuildingControllerInterface {
    * This can be used to simulate the building
    */
   private void step() {
-    building.step();
+    building.stepElevatorSystem();
   }
 
 
@@ -50,7 +51,7 @@ public class BuildingController implements BuildingControllerInterface {
    * @param request the request to process.
    */
   private void processRequest(Request request) {
-    building.addRequest(request);
+    building.addRequestToElevatorSystem(request);
   }
 
 

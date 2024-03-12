@@ -1,8 +1,9 @@
 package display;
 
 import building.handlers.RequestHandler;
-import building.handlers.StartHandler;
+import building.handlers.StartElevatorSystemHandler;
 import building.handlers.StepHandler;
+import building.handlers.StopElevatorSystemHandler;
 import building.handlers.UpdateHandler;
 import building.BuildingReport;
 
@@ -24,7 +25,9 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
   private StepHandler stepHandler = null;
 
-  private StartHandler startHandler = null;
+  private StartElevatorSystemHandler startHandler = null;
+
+  private StopElevatorSystemHandler stopHandler = null;
 
 
   public ConsoleBuildingDisplay() {
@@ -59,8 +62,18 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
    * @param startHandler the start handler
    */
   @Override
-  public void setStartListener(StartHandler startHandler) {
+  public void setStartListener(StartElevatorSystemHandler startHandler) {
     this.startHandler = startHandler;
+  }
+
+  /**
+   * This method is used to set the stop listener.
+   *
+   * @param stopHandler the stop handler
+   */
+  @Override
+  public void setStopListener(StopElevatorSystemHandler stopHandler) {
+    this.stopHandler = stopHandler;
   }
 
   /**
@@ -116,15 +129,15 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           break;
 
         case "h":
-          if (this.startHandler != null) {
-            this.startHandler.requestHandler(false);
+          if (this.stopHandler != null) {
+            this.stopHandler.requestHandler();
             System.out.println("Halting the operations of the building");
           }
           break;
 
         case "c":
           if (this.startHandler != null) {
-            this.startHandler.requestHandler(true);
+            this.startHandler.requestHandler();
             System.out.println("Continuing the operations of the building");
           }
           break;

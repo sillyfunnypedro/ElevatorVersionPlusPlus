@@ -72,24 +72,41 @@ public class Building implements BuildingInterface {
     for (int i = 0; i < numberOfElevators; i++) {
       this.elevators[i] = new Elevator(numberOfFloors, this.elevatorCapacity);
     }
+    this.elevatorsStatus = ElevatorSystemStatus.outOfService;
   }
 
   /**
    * This method is used to start the building elevator system.
    */
   @Override
-  public void start(boolean startElevators) {
+  public void startElevatorSystem() {
+    // if we are running and it is a request to start we ignore it.
+
     if (this.elevatorsStatus == ElevatorSystemStatus.running) {
       return;
     }
 
+    // If the elevator System is stopping and it is a request to stop we throw an exception
+    if (this.elevatorsStatus == ElevatorSystemStatus.stopping) {
+      throw new IllegalStateException("Elevator cannot be started until it is stopped");
+    }
 
-    // for all of the elevators in the building, start them.
-    if (startElevators) {
-      for (ElevatorInterface elevator : this.elevators) {
-        elevator.start();
-        this.elevatorsStatus = ElevatorSystemStatus.running;
-      }
+    // At this point we know we are stopped.
+    // GO GO GO!
+    for (ElevatorInterface elevator : this.elevators) {
+      elevator.start();
+    }
+    this.elevatorsStatus = ElevatorSystemStatus.running;
+  }
+
+
+  /**
+   * This method is used to take the elevator out of service.
+   */
+  @Override
+  public void stopElevatorSystem() {
+    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService
+        || this.elevatorsStatus == ElevatorSystemStatus.stopping) {
       return;
     }
 
@@ -100,10 +117,7 @@ public class Building implements BuildingInterface {
       // delete the requests
       this.upRequests.clear();
       this.downRequests.clear();
-
     }
-
-
   }
 
   /**
@@ -142,7 +156,7 @@ public class Building implements BuildingInterface {
    * @return String of the JSON object.
    */
   @Override
-  public BuildingReport getElevatorSystemStatus() {
+  public BuildingReport getStatusElevatorSystem() {
 
     ElevatorReport[] elevatorReports = new ElevatorReport[this.elevators.length];
     for (int i = 0; i < this.elevators.length; i++) {
@@ -167,7 +181,7 @@ public class Building implements BuildingInterface {
    * @param request the request to be added to the building
    */
   @Override
-  public void addRequest(Request request) {
+  public void addRequestToElevatorSystem(Request request) {
     if (this.elevatorsStatus == ElevatorSystemStatus.outOfService ||
         this.elevatorsStatus == ElevatorSystemStatus.stopping) {
       throw new IllegalStateException("Elevator system not accepting requests.");
@@ -204,7 +218,7 @@ public class Building implements BuildingInterface {
    * This method is used to step the building elevator system.
    */
   @Override
-  public void step() {
+  public void stepElevatorSystem() {
     if (this.elevatorsStatus == ElevatorSystemStatus.outOfService) {
       return;
     }

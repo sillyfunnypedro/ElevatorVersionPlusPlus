@@ -1,9 +1,6 @@
 package display;
 
-import building.handlers.RequestHandler;
-import building.handlers.StartHandler;
-import building.handlers.StepHandler;
-import building.handlers.UpdateHandler;
+import building.handlers.*;
 
 /**
  * This interface is used to represent the building display.
@@ -16,7 +13,9 @@ public interface BuildingDisplayInterface {
 
   public void setStepListener(StepHandler stepHandler);
 
-  public void setStartListener(StartHandler startHandler);
+  public void setStartListener(StartElevatorSystemHandler startHandler);
+
+  public void setStopListener(StopElevatorSystemHandler stopHandler);
 
 
   public void start();

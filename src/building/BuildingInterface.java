@@ -1,6 +1,5 @@
 package building;
 
-import org.json.JSONObject;
 import scanerzus.Request;
 
 /**
@@ -30,15 +29,14 @@ public interface BuildingInterface {
 
   /**
    * Start the building elevator system.
-   * This method is used to start the building elevator system.  If the startElevators
-   * parameter is true, then the elevators will be started.  If the startElevators
-   * parameter is false, then the elevators will not be started.
-   *
-   * @param startElevators if true, then the elevators will be started.
-   *                       If false, then the elevators will be stopped.
+   * This method is used to start the building elevator system.
    */
-  public void start(boolean startElevators);
+  public void startElevatorSystem();
 
+  /**
+   * This method is used to take the elevator out of service.
+   */
+  public void stopElevatorSystem();
 
   /**
    * This method is used to get the elevator system status.
@@ -46,18 +44,18 @@ public interface BuildingInterface {
    *
    * @return the elevator system status
    */
-  BuildingReport getElevatorSystemStatus();
+  BuildingReport getStatusElevatorSystem();
 
   /**
    * This method is used to add a request to the building.
    *
    * @param request the request to be added to the building
    */
-  public void addRequest(Request request);
+  public void addRequestToElevatorSystem(Request request);
 
   /**
    * This method is used to step the building elevator system.
    */
-  public void step();
+  public void stepElevatorSystem();
 
 }
