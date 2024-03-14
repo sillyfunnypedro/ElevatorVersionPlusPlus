@@ -136,9 +136,18 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           break;
 
         case "c":
+
           if (this.startHandler != null) {
-            this.startHandler.requestHandler();
-            System.out.println("Continuing the operations of the building");
+            try {
+              this.startHandler.requestHandler();
+              System.out.println("Continuing the operations of the building");
+            } catch (IllegalStateException e) {
+              System.out.println(e.getMessage());
+              System.out.println("Press enter to continue");
+              scanner.nextLine();
+              break;
+            }
+
           }
           break;
 
@@ -204,8 +213,8 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   }
 
   private void runStep(int steps) {
-    if (steps > 100) {
-      System.out.println("The number of steps is too large.  The maximum number of steps is 100");
+    if (steps > 1000) {
+      System.out.println("The number of steps is too large.  The maximum number of steps is 1000");
       System.out.println("press enter to continue");
       Scanner scanner = new Scanner(System.in);
       scanner.nextLine();
@@ -253,16 +262,16 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
     }
     // check the first character of the input
     char firstChar = input.charAt(0);
-
+    String[] tokens;
     switch (firstChar) {
       case 's':
-        String[] parts = input.split(" ");
-        if (parts.length == 1) {
+        tokens = input.split(" ");
+        if (tokens.length == 1) {
           return new String[]{"s", "1"};
         } else {
 
           try {
-            int steps = Integer.parseInt(parts[1]);
+            int steps = Integer.parseInt(tokens[1]);
             return new String[]{"s", Integer.toString(steps)};
           } catch (NumberFormatException e) {
             System.out.println("Invalid input");
@@ -273,14 +282,14 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
 
       case 'r':
-        parts = input.split(" ");
-        if (parts.length != 3) {
+        tokens = input.split(" ");
+        if (tokens.length != 3) {
           System.out.println("Invalid input");
           return new String[]{"invalid"};
         } else {
           try {
-            int fromFloor = Integer.parseInt(parts[1]);
-            int toFloor = Integer.parseInt(parts[2]);
+            int fromFloor = Integer.parseInt(tokens[1]);
+            int toFloor = Integer.parseInt(tokens[2]);
             return new String[]{"r", Integer.toString(fromFloor), Integer.toString(toFloor)};
           } catch (NumberFormatException e) {
             System.out.println("Invalid input");
@@ -289,14 +298,14 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
           }
         }
       case 't':
-        parts = input.split(" ");
-        if (parts.length == 1) {
+        tokens = input.split(" ");
+        if (tokens.length == 1) {
           return new String[]{"t", "1"};
         } else {
           // we will try to get the number.
           // if it is not a number we will default to 1
           try {
-            int requests = Integer.parseInt(parts[1]);
+            int requests = Integer.parseInt(tokens[1]);
             return new String[]{"t", Integer.toString(requests)};
           } catch (NumberFormatException e) {
             return new String[]{"t", "1"};

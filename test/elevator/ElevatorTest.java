@@ -408,15 +408,15 @@ public class ElevatorTest {
 
     // check that the waits at the top for 5 steps
     assertEquals(Direction.DOWN, elevatorTenFloors10Capacity.getDirection());
-    assertEquals("W[5,9]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 9, Time 5]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[4,9]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 9, Time 4]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[3,9]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 9, Time 3]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[2,9]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 9, Time 2]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[1,9]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 9, Time 1]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
 
     // check that the floor is 9 and the direction is down and the door is closed
@@ -481,15 +481,15 @@ public class ElevatorTest {
     elevatorTenFloors10Capacity.step();
 
     // check that we are waiting for 5 steps
-    assertEquals("W[5,0]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 5]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[4,0]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 4]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[3,0]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 3]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[2,0]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 2]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("W[1,0]", elevatorTenFloors10Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 1]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
 
 
@@ -529,7 +529,7 @@ public class ElevatorTest {
 
 
     // elevator should be waiting for 5 steps
-    assertEquals("W[5,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 5]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.processRequests(downThreeRequests);
 
     // elevator should be on floor 2 with the door closed.
@@ -609,15 +609,15 @@ public class ElevatorTest {
     elevatorThreeFloors3Capacity.step();
 
     // the elevator should be on floor 0 and waiting for 5 steps
-    assertEquals("W[5,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 5]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[4,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 4]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[3,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 3]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[2,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 2]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[1,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 1]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
 
     // the elevator should now be going up, its door closed and on floor 0
@@ -637,7 +637,7 @@ public class ElevatorTest {
     elevatorThreeFloors3Capacity.step();
 
     // the elevator should be waiting for 5 steps
-    assertEquals("W[5,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 5]", elevatorThreeFloors3Capacity.toString());
 
   }
 
@@ -672,68 +672,68 @@ public class ElevatorTest {
     System.out.println("Testing: elevatorToString");
     elevatorThreeFloors3Capacity.start();
     elevatorThreeFloors3Capacity.processRequests(upThreeRequests);
-    assertEquals("[0|^|closed]<  0  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|C  ]<  0  1  2>", elevatorThreeFloors3Capacity.toString());
 
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|^|open 3]< --  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|O 3]< --  1  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|^|open 2]< --  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|O 2]< --  1  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|^|open 1]< --  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|O 1]< --  1  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|^|closed]< --  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|C  ]< --  1  2>", elevatorThreeFloors3Capacity.toString());
 
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|^|closed]< --  1  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|^|C  ]< --  1  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|^|open 3]< -- --  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|^|O 3]< -- --  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|^|open 2]< -- --  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|^|O 2]< -- --  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|^|open 1]< -- --  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|^|O 1]< -- --  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|^|closed]< -- --  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|^|C  ]< -- --  2>", elevatorThreeFloors3Capacity.toString());
 
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|^|closed]< -- --  2>", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|^|C  ]< -- --  2>", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|^|open 3]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|^|O 3]< -- -- -->", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|^|open 2]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|^|O 2]< -- -- -->", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|^|open 1]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|^|O 1]< -- -- -->", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|^|closed]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|^|C  ]< -- -- -->", elevatorThreeFloors3Capacity.toString());
 
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[5,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 5]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[4,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 4]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[3,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 3]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[2,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 2]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[1,2]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 2, Time 1]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[2|v|closed]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[2|v|C  ]< -- -- -->", elevatorThreeFloors3Capacity.toString());
 
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[1|v|closed]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[1|v|C  ]< -- -- -->", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|v|closed]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|v|C  ]< -- -- -->", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[5,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 5]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[4,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 4]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[3,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 3]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[2,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 2]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("W[1,0]", elevatorThreeFloors3Capacity.toString());
+    assertEquals("Waiting[Floor 0, Time 1]", elevatorThreeFloors3Capacity.toString());
     elevatorThreeFloors3Capacity.step();
-    assertEquals("[0|^|closed]< -- -- -->", elevatorThreeFloors3Capacity.toString());
+    assertEquals("[0|^|C  ]< -- -- -->", elevatorThreeFloors3Capacity.toString());
 
   }
 
@@ -742,7 +742,7 @@ public class ElevatorTest {
    * The elevator should immediately flush all of its stop requests and head to
    * the ground floor with the door closed.
    * when it gets there it should open the door and remain out of service with the door open
-   * The final state of the elevator should be [0|-|open 3]< -- -- -- -- -- -- -- -- -- -->
+   * The final state of the elevator should be [0|-|O 3]< -- -- -- -- -- -- -- -- -- -->
    */
   @Test
   public void takeElevatorOutOfServiceWhenDoorIsClosed() {
@@ -754,37 +754,34 @@ public class ElevatorTest {
     }
     // elevator is on floor 4
     assertEquals(4, elevatorTenFloors10Capacity.getCurrentFloor());
-    assertEquals("[4|^|closed]< -- -- -- -- --  5  6 -- --  9>",
+    assertEquals("[4|^|C  ]< -- -- -- -- --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.takeOutOfService();
 
-    assertEquals("[4|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[4|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[3|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[3|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[2|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[2|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[1|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[1|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
-    elevatorTenFloors10Capacity.step();
-    assertEquals("[0|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
-        elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("Out of Service[Floor 0]",
         elevatorTenFloors10Capacity.toString());
     for (int i = 0; i < 1000; i++) {
       elevatorTenFloors10Capacity.step();
     }
-    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("Out of Service[Floor 0]",
         elevatorTenFloors10Capacity.toString());
 
     // Now we put the elevator back in service
@@ -796,12 +793,12 @@ public class ElevatorTest {
     assertEquals(0, elevatorTenFloors10Capacity.getCurrentFloor());
     assertEquals(Direction.UP, elevatorTenFloors10Capacity.getDirection());
     assertFalse(elevatorTenFloors10Capacity.isDoorClosed());
-    assertEquals("[0|^|open 3]< --  1  2  3 --  5  6 -- --  9>",
+    assertEquals("[0|^|O 3]< --  1  2  3 --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
 
     // the elevator is on floor 0 and the door is open for 2 steps
-    assertEquals("[0|^|open 2]< --  1  2  3 --  5  6 -- --  9>",
+    assertEquals("[0|^|O 2]< --  1  2  3 --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
 
   }
@@ -811,7 +808,7 @@ public class ElevatorTest {
    * The elevator should immediately flush all of its stop requests and head to
    * the ground floor with the door closed.
    * when it gets there it should open the door and remain out of service with the door open
-   * The final state of the elevator should be [0|-|open 3]< -- -- -- -- -- -- -- -- -- -->
+   * The final state of the elevator should be [0|-|O 3]< -- -- -- -- -- -- -- -- -- -->
    */
   @Test
   public void takeElevatorOutOfServiceWhenDoorIsOpened() {
@@ -823,49 +820,49 @@ public class ElevatorTest {
     }
     // elevator is on floor 5
     assertEquals(5, elevatorTenFloors10Capacity.getCurrentFloor());
-    assertEquals("[5|^|open 3]< -- -- -- -- -- --  6 -- --  9>",
+    assertEquals("[5|^|O 3]< -- -- -- -- -- --  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.takeOutOfService();
 
     // The door must close normally but the requests are gone
     elevatorTenFloors10Capacity.step();
-    assertEquals("[5|v|open 2]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[5|v|O 2]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("[5|v|open 1]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[5|v|O 1]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
-    assertEquals("[5|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
-        elevatorTenFloors10Capacity.toString());
-
-    elevatorTenFloors10Capacity.step();
-    assertEquals("[4|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[5|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[3|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[4|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[2|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[3|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[1|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[2|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[0|v|closed]<  0 -- -- -- -- -- -- -- -- -->",
+    assertEquals("[1|v|C  ]< -- -- -- -- -- -- -- -- -- -->",
         elevatorTenFloors10Capacity.toString());
 
     elevatorTenFloors10Capacity.step();
-    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("Out of Service[Floor 0]",
+        elevatorTenFloors10Capacity.toString());
+
+    elevatorTenFloors10Capacity.step();
+    assertEquals("Out of Service[Floor 0]",
         elevatorTenFloors10Capacity.toString());
     for (int i = 0; i < 1000; i++) {
       elevatorTenFloors10Capacity.step();
     }
-    assertEquals("[0|-|open 0]< -- -- -- -- -- -- -- -- -- -->",
+    assertEquals("Out of Service[Floor 0]",
         elevatorTenFloors10Capacity.toString());
 
     // Now we put the elevator back in service
@@ -877,12 +874,12 @@ public class ElevatorTest {
     assertEquals(0, elevatorTenFloors10Capacity.getCurrentFloor());
     assertEquals(Direction.UP, elevatorTenFloors10Capacity.getDirection());
     assertFalse(elevatorTenFloors10Capacity.isDoorClosed());
-    assertEquals("[0|^|open 3]< --  1  2  3 --  5  6 -- --  9>",
+    assertEquals("[0|^|O 3]< --  1  2  3 --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
 
     // the elevator is on floor 0 and the door is open for 2 steps
-    assertEquals("[0|^|open 2]< --  1  2  3 --  5  6 -- --  9>",
+    assertEquals("[0|^|O 2]< --  1  2  3 --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
 
   }
@@ -901,12 +898,12 @@ public class ElevatorTest {
     }
 
     assertEquals(1, elevatorTenFloors10Capacity.getCurrentFloor());
-    assertEquals("[1|^|open 3]< -- --  2  3 --  5  6 -- --  9>",
+    assertEquals("[1|^|O 3]< -- --  2  3 --  5  6 -- --  9>",
         elevatorTenFloors10Capacity.toString());
 
 
     ElevatorReport report = elevatorTenFloors10Capacity.getElevatorStatus();
-    assertEquals("[1|^|open 3]< -- --  2  3 --  5  6 -- --  9>", report.toString());
+    assertEquals("[1|^|O 3]< -- --  2  3 --  5  6 -- --  9>", report.toString());
 
     // The data in the report should match the state of the elevator
     assertEquals(1, report.getCurrentFloor());

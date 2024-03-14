@@ -25,6 +25,9 @@ public class AsciiBuildingDisplay {
   }
 
   private String leftString(String s, int width) {
+    if (width - s.length() - 1 < 0) {
+      return s;
+    }
     return "* " + s + " ".repeat(width - s.length() - 1) + "*";
   }
 
@@ -36,14 +39,20 @@ public class AsciiBuildingDisplay {
     StringBuilder sb = new StringBuilder();
     StringBuilder line = new StringBuilder();
     line.append(title);
-    line.append(" ");
-    int width = 76;
+    // pad the title to be 4 wide
+    if (line.length() < 4) {
+      line.append(" ".repeat(4 - line.length()));
+    }
+    // add the count of requests
+    line.append(String.format("[(%03d)]", requests.size()));
 
+    line.append(" ");
+    int width = 65;
+    int requestsProcessed = 0;
     for (Request request : requests) {
       if (line.length() + request.toString().length() > width) {
-        sb.append(centreString(line.toString(), 78));
-        sb.append("\n");
-        line = new StringBuilder();
+        line.append("...");
+        break;
       }
       line.append(request.toString());
       line.append(" ");
@@ -95,9 +104,9 @@ public class AsciiBuildingDisplay {
     sb.append("\n");
     sb.append(this.bar(80));
 
-    sb.append(this.requestsToString("Up Requests",
+    sb.append(this.requestsToString("Up",
         buildingReport.getUpRequests()));
-    sb.append(this.requestsToString("Down Requests",
+    sb.append(this.requestsToString("Down",
         buildingReport.getDownRequests()));
 
 

@@ -84,9 +84,6 @@ public class BuildingTest {
 
     assertEquals(1, report.getElevatorReports()[1].getCurrentFloor());
 
-    building
-
-
 
   }
 
