@@ -212,6 +212,7 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
   }
 
+
   private void runStep(int steps) {
     if (steps > 1000) {
       System.out.println("The number of steps is too large.  The maximum number of steps is 1000");

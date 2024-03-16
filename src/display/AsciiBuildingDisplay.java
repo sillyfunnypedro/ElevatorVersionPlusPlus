@@ -66,13 +66,22 @@ public class AsciiBuildingDisplay {
   }
 
   /**
+   * This method is used to clear the screen.
+   *
+   * @return the string to clear the screen.
+   */
+  private String clearScreen() {
+    return "\033[H\033[2J";
+  }
+
+  /**
    * Building Display method for the BuildingReport.
    *
    * @return the string representation of the BuildingReport
    */
   private String buildingDisplay(BuildingReport buildingReport) {
     StringBuilder sb = new StringBuilder();
-    sb.append("\033[H\033[2J");
+    sb.append(this.clearScreen());
     sb.append(this.bar(80));
 
 

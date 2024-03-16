@@ -8,6 +8,9 @@ import org.junit.Test;
 import org.junit.Before;
 import scanerzus.Request;
 
+/**
+ * This class tests the Building class.
+ */
 public class BuildingTest {
   private Building building;
 
