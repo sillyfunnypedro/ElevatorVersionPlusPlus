@@ -77,7 +77,7 @@ public class ElevatorReportTest {
 
   @Test
   public void testToString() {
-    String expected = "[1|-|closed]< --  1  2>";
+    String expected = "[1|-|C  ]< --  1  2>";
     assertEquals(expected, report.toString());
   }
 
@@ -247,7 +247,7 @@ public class ElevatorReportTest {
   public void testOtherClassesNotEqual() {
     assertNotEquals(report, new Object());
   }
-  
+
   @Test
   public void testSameObjectEqual() {
     assertEquals(report, report);

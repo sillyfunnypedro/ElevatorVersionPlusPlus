@@ -199,14 +199,8 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   }
 
   private void detailedDisplay(Scanner scanner) {
-    System.out.println("Building Display");
-    System.out.println("Enter one of the following commands: ");
-    System.out.println("s: <steps> step the building by <steps> (max 100)");
-    System.out.println("q: quit the simulation.");
-    System.out.println("h: halt the operations of the building.");
-    System.out.println("c: continue the operations of the building.");
-    System.out.println("r: fromFloor, toFloor: request an elevator from fromFloor to toFloor.");
-    System.out.println("press enter to continue");
+    String welcomeString = new AsciiBuildingDisplay().welcomeString();
+    System.out.print(welcomeString);
 
     scanner.nextLine();
 

@@ -24,6 +24,11 @@ public class AsciiBuildingDisplay {
     return "*" + " ".repeat(leftPadding) + s + " ".repeat(rightPadding) + "*";
   }
 
+  private String emptyLine(int width) {
+    return "*" + " ".repeat(width - 2) + "*";
+  }
+
+
   private String leftString(String s, int width) {
     if (width - s.length() - 1 < 0) {
       return s;
@@ -133,6 +138,40 @@ public class AsciiBuildingDisplay {
     sb.append(this.bar(80));
 
 
+    return sb.toString();
+  }
+
+  /**
+   * This method is used to generate the welcome string.
+   *
+   * @return the welcome string.
+   */
+  public String welcomeString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(this.clearScreen());
+    sb.append(this.bar(80));
+    sb.append(this.centreString("Welcome to the Elevator System", 78)).append("\n");
+    sb.append(this.bar(80));
+    sb.append(this.emptyLine(80)).append("\n");
+    sb.append(this.centreString("IMPORTANT NOTICE", 78)).append("\n");
+    sb.append(this.emptyLine(80)).append("\n");
+    sb.append(this.centreString("This system is for your experimentation only", 78)).append("\n");
+    sb.append(this.centreString("your final project will not look like this.", 78)).append("\n");
+    sb.append(this.emptyLine(80)).append("\n");
+    sb.append(this.bar(80));
+
+    sb.append(this.centreString("You might find this useful when you are building",
+        78)).append("\n");
+    sb.append(this.centreString("your final project.", 78)).append("\n");
+    sb.append(this.emptyLine(80)).append("\n");
+    sb.append(this.centreString("In particular you can use this to develop tests for",
+        78)).append("\n");
+    sb.append(this.centreString("your final project.", 78)).append("\n");
+    sb.append(this.emptyLine(80)).append("\n");
+
+
+    sb.append(this.bar(80));
+    sb.append("Press any key to continue");
     return sb.toString();
   }
 

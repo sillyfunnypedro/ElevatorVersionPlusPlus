@@ -1,6 +1,5 @@
 package scanerzus;
 
-import org.json.JSONObject;
 
 /**
  * This interface is used define requests for the elevator.
@@ -21,10 +20,5 @@ public interface RequestInterface {
    */
   int getEndFloor();
 
-  /**
-   * toJson method.
-   *
-   * @return JSONObject.
-   */
-  JSONObject toJson();
+
 }
