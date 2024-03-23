@@ -23,11 +23,26 @@ public class MainConsole {
    */
   public static void main(String[] args) {
 
+    if (args.length != 0 && args.length != 3) {
+      System.out.println("Usage: java -jar ElevatorSample floors elevators, capacity");
+      System.exit(1);
+    }
+
+    // The number of floors, elevators, and people can be passed in as command line arguments.
+    // If they are not passed in, the default values will be used.
+
+
     // the number of floors, the number of elevators, and the number of people.
 
-    final int numFloors = 11;
-    final int numElevators = 8;
-    final int numPeople = 3;
+    int numFloors = 11;
+    int numElevators = 8;
+    int numPeople = 3;
+
+    if (args.length == 3) {
+      numFloors = Integer.parseInt(args[0]);
+      numElevators = Integer.parseInt(args[1]);
+      numPeople = Integer.parseInt(args[2]);
+    }
 
 
     Building building = new Building(numFloors, numElevators, numPeople);

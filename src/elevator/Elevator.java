@@ -266,7 +266,7 @@ public class Elevator implements ElevatorInterface {
     // we need to set the direction to up
     // we set the timer to this.stopWaitTimeTotal
     if (this.currentFloor == 0 && this.direction == Direction.DOWN) {
-      this.direction = Direction.UP;
+      this.direction = Direction.STOPPED;
       this.stopWaitTimeLeft = this.stopWaitTimeTotal;
       this.takingRequests = true;
       return;
@@ -277,7 +277,7 @@ public class Elevator implements ElevatorInterface {
     // we need to set the direction to down
     // we set the timer to this.stopWaitTimeTotal
     if (this.currentFloor == this.maxFloor - 1 && this.direction == Direction.UP) {
-      this.direction = Direction.DOWN;
+      this.direction = Direction.STOPPED;
       this.stopWaitTimeLeft = this.stopWaitTimeTotal;
       this.takingRequests = true;
       return;
@@ -293,7 +293,7 @@ public class Elevator implements ElevatorInterface {
     int floorIncrement = 1;
     if (this.direction == Direction.UP) {
       this.currentFloor += floorIncrement;
-    } else {
+    } else if (this.direction == Direction.DOWN) {
       this.currentFloor -= floorIncrement;
     }
   }
@@ -353,6 +353,11 @@ public class Elevator implements ElevatorInterface {
     this.stopWaitTimeLeft--;
     if (this.stopWaitTimeLeft == 0) {
       this.takingRequests = false;
+      if (this.currentFloor == 0) {
+        this.direction = Direction.UP;
+      } else if (this.currentFloor == this.maxFloor - 1) {
+        this.direction = Direction.DOWN;
+      }
     }
   }
 

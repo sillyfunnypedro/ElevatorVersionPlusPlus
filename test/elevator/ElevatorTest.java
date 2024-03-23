@@ -186,6 +186,25 @@ public class ElevatorTest {
   }
 
   /**
+   * Test that the elevator reports stopped when at the top floor.
+   */
+  @Test
+  public void elevatorStoppedAtTopFloor() {
+    System.out.println("Testing: elevatorStoppedAtTopFloor");
+    Elevator elevator = new Elevator(3, 3);
+    elevator.start();
+    // wait for the a job and then give up
+    for (int i = 0; i < 5; i++) {
+      elevator.step();
+    }
+    // send the elevator to the top floor
+    for (int i = 0; i < 3; i++) {
+      elevator.step();
+    }
+    assertEquals(elevator.getDirection(), Direction.STOPPED);
+  }
+
+  /**
    * Test the start method.
    */
   @Test
@@ -407,7 +426,7 @@ public class ElevatorTest {
     elevatorTenFloors10Capacity.step();
 
     // check that the waits at the top for 5 steps
-    assertEquals(Direction.DOWN, elevatorTenFloors10Capacity.getDirection());
+    assertEquals(Direction.STOPPED, elevatorTenFloors10Capacity.getDirection());
     assertEquals("Waiting[Floor 9, Time 5]", elevatorTenFloors10Capacity.toString());
     elevatorTenFloors10Capacity.step();
     assertEquals("Waiting[Floor 9, Time 4]", elevatorTenFloors10Capacity.toString());

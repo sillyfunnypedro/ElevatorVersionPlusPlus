@@ -325,7 +325,10 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
 
   public void displayPrompt() {
-    System.out.print("[s steps], [CR] one step, [r start end] [h] halt [c] continue [q] quit > ");
+    System.out.print("[s steps] Run steps times [CR] one step\n"
+        + "[r start end] make a request \n"
+        + "[t requests] generate random requests\n"
+        + "[h] halt building [c] continue building [q] quit > ");
   }
 
 
