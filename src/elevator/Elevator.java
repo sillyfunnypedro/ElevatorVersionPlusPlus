@@ -397,6 +397,7 @@ public class Elevator implements ElevatorInterface {
   @Override
   public void takeOutOfService() {
     this.clearStopRequests();
+    this.takingRequests = false;
     this.direction = Direction.DOWN;
 
     this.outOfService = true;

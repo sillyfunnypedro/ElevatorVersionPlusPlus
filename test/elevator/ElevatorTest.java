@@ -183,13 +183,16 @@ public class ElevatorTest {
     System.out.println("Testing: elevatorStartsOutOfService");
     Elevator elevator = new Elevator(10, 5);
     assertEquals(elevator.getDirection(), Direction.STOPPED);
+    assertFalse(elevator.isTakingRequests());
   }
 
   /**
-   * Test that the elevator reports stopped when at the top floor.
+   * Test that the elevator reports stopped when at the top floor,
+   * then reports STOPPED when it returns to the ground floor.
+   * then test that it reports STOPPED when out of service.
    */
   @Test
-  public void elevatorStoppedAtTopFloor() {
+  public void elevatorReportsStopped() {
     System.out.println("Testing: elevatorStoppedAtTopFloor");
     Elevator elevator = new Elevator(3, 3);
     elevator.start();
@@ -202,6 +205,60 @@ public class ElevatorTest {
       elevator.step();
     }
     assertEquals(elevator.getDirection(), Direction.STOPPED);
+    assertEquals(elevator.getCurrentFloor(), 2);
+    // wait for the a job and then give up
+    for (int i = 0; i < 5; i++) {
+      elevator.step();
+    }
+    // send the elevator to the ground floor
+    for (int i = 0; i < 3; i++) {
+      elevator.step();
+    }
+    assertEquals(elevator.getDirection(), Direction.STOPPED);
+    assertEquals(elevator.getCurrentFloor(), 0);
+
+    // now put the elevator out of service.
+    elevator.takeOutOfService();
+    // Do one step to let the elevator process the out of service request.
+    elevator.step();
+    assertFalse(elevator.isTakingRequests());
+    // check to see if it returns STOPPED when out of service.
+    assertEquals(elevator.getDirection(), Direction.STOPPED);
+  }
+
+  /**
+   * Test that the elevator can be taken out of service when it is not on the ground floor
+   * and has no requests.
+   */
+  @Test
+  public void elevatorOutOfService() {
+    System.out.println("Testing: elevatorOutOfService");
+    Elevator elevator = new Elevator(10, 5);
+    elevator.start();
+    // wait for the a job and then give up
+    for (int i = 0; i < 5; i++) {
+      elevator.step();
+    }
+    // send the elevator up three floors
+    for (int i = 0; i < 3; i++) {
+      elevator.step();
+    }
+
+    elevator.takeOutOfService();
+
+    // it should not be taking requests now.
+    assertFalse(elevator.isTakingRequests());
+    // it should now move to the ground floor
+    for (int i = 0; i < 3; i++) {
+      elevator.step();
+    }
+    assertEquals(elevator.getCurrentFloor(), 0);
+    // it should be out of service
+    assertFalse(elevator.isTakingRequests());
+
+    // one more step to take it out of service
+    elevator.step();
+    assertEquals(Direction.STOPPED, elevator.getElevatorStatus().getDirection());
   }
 
   /**

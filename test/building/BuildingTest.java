@@ -13,10 +13,12 @@ import scanerzus.Request;
  */
 public class BuildingTest {
   private Building building;
+  private Building tallBuilding;
 
   @Before
   public void setUp() {
     building = new Building(4, 2, 3);
+    tallBuilding = new Building(30, 10, 20);
   }
 
   @Test
@@ -88,6 +90,32 @@ public class BuildingTest {
     assertEquals(1, report.getElevatorReports()[1].getCurrentFloor());
 
 
+  }
+
+  /**
+   * We are going to add 30 requests to the building and then step the system 20 times.
+   */
+  @Test
+  public void testAddManyRequests() {
+    tallBuilding.startElevatorSystem();
+    for (int i = 0; i < 100; i++) {
+      // create random requests to add to the building
+      int startFloor = (int) (Math.random() * 30);
+      int endFloor = (int) (Math.random() * 30);
+      if (startFloor == endFloor) {
+        endFloor = (endFloor + 1) % 30;
+      }
+
+      tallBuilding.addRequestToElevatorSystem(new Request(startFloor, endFloor));
+    }
+
+    for (int i = 0; i < 20; i++) {
+      tallBuilding.stepElevatorSystem();
+    }
+
+    BuildingReport report = tallBuilding.getStatusElevatorSystem();
+//    assertEquals(1, report.getElevatorReports()[0].getCurrentFloor());
+//    assertEquals(1, report.getElevatorReports()[1].getCurrentFloor());
   }
 
 
