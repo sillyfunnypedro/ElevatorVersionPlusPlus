@@ -19,19 +19,22 @@ public class ElevatorReport {
 
   private final boolean isTakingRequests;
 
+  private final int outstandingRequests;
+
 
   /**
    * This constructor is used to create a new ElevatorReport object.
    *
-   * @param elevatorId       The id of the elevator.
-   * @param currentFloor     The current floor of the elevator.
-   * @param doorClosed       The status of the door.
-   * @param floorRequests    The requests for the floors.
-   * @param direction        The direction of the elevator.
-   * @param doorOpenTimer    The timer for the door.
-   * @param endWaitTimer     The timer for the end of the run.
-   * @param outOfService     The status of the elevator.
-   * @param isTakingRequests Is the elevator taking requests.
+   * @param elevatorId          The id of the elevator.
+   * @param currentFloor        The current floor of the elevator.
+   * @param doorClosed          The status of the door.
+   * @param floorRequests       The requests for the floors.
+   * @param direction           The direction of the elevator.
+   * @param doorOpenTimer       The timer for the door.
+   * @param endWaitTimer        The timer for the end of the run.
+   * @param outOfService        The status of the elevator.
+   * @param isTakingRequests    Is the elevator taking requests.
+   * @param outstandingRequests The number of outstanding requests.
    */
   public ElevatorReport(int elevatorId,
                         int currentFloor,
@@ -42,7 +45,8 @@ public class ElevatorReport {
                         int doorOpenTimer,
                         int endWaitTimer,
                         boolean outOfService,
-                        boolean isTakingRequests) {
+                        boolean isTakingRequests,
+                        int outstandingRequests) {
     this.elevatorId = elevatorId;
     this.currentFloor = currentFloor;
     this.doorClosed = doorClosed;
@@ -52,6 +56,7 @@ public class ElevatorReport {
     this.endWaitTimer = endWaitTimer;
     this.outOfService = outOfService;
     this.isTakingRequests = isTakingRequests;
+    this.outstandingRequests = outstandingRequests;
   }
 
 
@@ -140,46 +145,23 @@ public class ElevatorReport {
   }
 
   /**
-   * toString method for the ElevatorReport.
-   *
-   * @return the string representation of the ElevatorReport.
+   * The hashcode method for the ElevatorReport.
    */
   @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-
-    // if the elevator is out of service and on the ground floor
-    if (this.outOfService && this.currentFloor == 0) {
-      sb.append(String.format("Out of Service[Floor %d]", this.currentFloor));
-      return sb.toString();
+  public int hashCode() {
+    int result = 17;
+    result = 31 * result + this.elevatorId;
+    result = 31 * result + this.currentFloor;
+    result = 31 * result + (this.doorClosed ? 1 : 0);
+    result = 31 * result + this.doorOpenTimer;
+    result = 31 * result + this.endWaitTimer;
+    result = 31 * result + (this.outOfService ? 1 : 0);
+    result = 31 * result + (this.isTakingRequests ? 1 : 0);
+    result = 31 * result + this.direction.hashCode();
+    for (boolean floorRequest : this.floorRequests) {
+      result = 31 * result + (floorRequest ? 1 : 0);
     }
-
-    if (this.endWaitTimer > 0) {
-      sb.append(String.format("Waiting[Floor %d, Time %d]", this.currentFloor, this.endWaitTimer));
-      return sb.toString();
-    }
-
-    sb.append(String.format("[%d|%s|",
-        this.currentFloor,
-        this.direction));
-
-    if (this.doorClosed) {
-      sb.append("C  ]<");
-    } else {
-      sb.append(String.format("O %d]<", this.doorOpenTimer));
-    }
-
-    for (int i = 0; i < this.floorRequests.length; i++) {
-      if (this.floorRequests[i]) {
-        sb.append(String.format(" %2d", i));
-      } else {
-        sb.append(" --");
-      }
-    }
-    sb.append(">");
-
-    return sb.toString();
-
+    return result;
   }
 
   /**
@@ -229,22 +211,47 @@ public class ElevatorReport {
   }
 
   /**
-   * The hashcode method for the ElevatorReport.
+   * toString method for the ElevatorReport.
+   *
+   * @return the string representation of the ElevatorReport.
    */
   @Override
-  public int hashCode() {
-    int result = 17;
-    result = 31 * result + this.elevatorId;
-    result = 31 * result + this.currentFloor;
-    result = 31 * result + (this.doorClosed ? 1 : 0);
-    result = 31 * result + this.doorOpenTimer;
-    result = 31 * result + this.endWaitTimer;
-    result = 31 * result + (this.outOfService ? 1 : 0);
-    result = 31 * result + (this.isTakingRequests ? 1 : 0);
-    result = 31 * result + this.direction.hashCode();
-    for (boolean floorRequest : this.floorRequests) {
-      result = 31 * result + (floorRequest ? 1 : 0);
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    // if the elevator is out of service and on the ground floor
+    if (this.outOfService && this.currentFloor == 0) {
+      sb.append(String.format("Out of Service[Floor %d]", this.currentFloor));
+      return sb.toString();
     }
-    return result;
+
+    if (this.endWaitTimer > 0) {
+      sb.append(String.format("Waiting[Floor %d, Time %d]", this.currentFloor, this.endWaitTimer));
+      return sb.toString();
+    }
+
+    sb.append(String.format("[%d|%s|",
+        this.currentFloor,
+        this.direction));
+
+    if (this.doorClosed) {
+      sb.append("C  ]<");
+    } else {
+      sb.append(String.format("O %d]<", this.doorOpenTimer));
+    }
+
+    for (int i = 0; i < this.floorRequests.length; i++) {
+      if (this.floorRequests[i]) {
+        sb.append(String.format(" %2d", i));
+      } else {
+        sb.append(" --");
+      }
+    }
+
+    sb.append(String.format("[ %d]", this.outstandingRequests));
+    sb.append(">");
+
+    return sb.toString();
+
   }
 }

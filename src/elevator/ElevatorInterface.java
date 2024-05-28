@@ -1,9 +1,7 @@
 package elevator;
 
 import building.enums.Direction;
-
 import java.util.List;
-
 import scanerzus.Request;
 
 
@@ -108,6 +106,8 @@ public interface ElevatorInterface {
    * @return true if the elevator is taking requests, false otherwise.
    */
   boolean isTakingRequests();
+
+  int getCurrentCapacity();
 
   /**
    * This method is used to get the elevator status ElevatorReport.

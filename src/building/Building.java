@@ -1,15 +1,13 @@
 package building;
 
+Maimport building.enums.Direction;
 import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
 import elevator.ElevatorInterface;
 import elevator.ElevatorReport;
-
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 import scanerzus.Request;
 
 
@@ -76,51 +74,6 @@ public class Building implements BuildingInterface {
   }
 
   /**
-   * This method is used to start the building elevator system.
-   */
-  @Override
-  public void startElevatorSystem() {
-    // if we are running and it is a request to start we ignore it.
-
-    if (this.elevatorsStatus == ElevatorSystemStatus.running) {
-      return;
-    }
-
-    // If the elevator System is stopping and it is a request to stop we throw an exception
-    if (this.elevatorsStatus == ElevatorSystemStatus.stopping) {
-      throw new IllegalStateException("Elevator cannot be started until it is stopped");
-    }
-
-    // At this point we know we are stopped.
-    // GO GO GO!
-    for (ElevatorInterface elevator : this.elevators) {
-      elevator.start();
-    }
-    this.elevatorsStatus = ElevatorSystemStatus.running;
-  }
-
-
-  /**
-   * This method is used to take the elevator out of service.
-   */
-  @Override
-  public void stopElevatorSystem() {
-    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService
-        || this.elevatorsStatus == ElevatorSystemStatus.stopping) {
-      return;
-    }
-
-    // for all of the elevators in the building, stop them.
-    for (ElevatorInterface elevator : this.elevators) {
-      elevator.takeOutOfService();
-      this.elevatorsStatus = ElevatorSystemStatus.stopping;
-      // delete the requests
-      this.upRequests.clear();
-      this.downRequests.clear();
-    }
-  }
-
-  /**
    * This method is used to get the number of floors in the building.
    *
    * @return the number of floors in the building
@@ -148,6 +101,50 @@ public class Building implements BuildingInterface {
   @Override
   public int getElevatorCapacity() {
     return this.elevatorCapacity;
+  }
+
+  /**
+   * This method is used to start the building elevator system.
+   */
+  @Override
+  public void startElevatorSystem() {
+    // if we are running and it is a request to start we ignore it.
+
+    if (this.elevatorsStatus == ElevatorSystemStatus.running) {
+      return;
+    }
+
+    // If the elevator System is stopping and it is a request to stop we throw an exception
+    if (this.elevatorsStatus == ElevatorSystemStatus.stopping) {
+      throw new IllegalStateException("Elevator cannot be started until it is stopped");
+    }
+
+    // At this point we know we are stopped.
+    // GO GO GO!
+    for (ElevatorInterface elevator : this.elevators) {
+      elevator.start();
+    }
+    this.elevatorsStatus = ElevatorSystemStatus.running;
+  }
+
+  /**
+   * This method is used to take the elevator out of service.
+   */
+  @Override
+  public void stopElevatorSystem() {
+    if (this.elevatorsStatus == ElevatorSystemStatus.outOfService
+        || this.elevatorsStatus == ElevatorSystemStatus.stopping) {
+      return;
+    }
+
+    // for all of the elevators in the building, stop them.
+    for (ElevatorInterface elevator : this.elevators) {
+      elevator.takeOutOfService();
+      this.elevatorsStatus = ElevatorSystemStatus.stopping;
+      // delete the requests
+      this.upRequests.clear();
+      this.downRequests.clear();
+    }
   }
 
   /**
@@ -261,18 +258,61 @@ public class Building implements BuildingInterface {
     // add upRequests up to the capacity of the elevator.
     // if the elevator is on the top floor add downRequests up to the capacity of the elevator.
     for (ElevatorInterface elevator : this.elevators) {
-      if (!elevator.isTakingRequests()) {
-        continue;
-      }
-      if (elevator.getCurrentFloor() == 0) {
-        List<Request> upRequestsForElevator = getRequests(this.upRequests);
-        elevator.processRequests(upRequestsForElevator);
-      } else if (elevator.getCurrentFloor() == this.numberOfFloors - 1) {
-        List<Request> downRequestsForElevator = getRequests(this.downRequests);
-        elevator.processRequests(downRequestsForElevator);
+//      if (!elevator.isTakingRequests()) {
+//        continue;
+//      }
+
+      if (elevator.getCurrentCapacity() > 0) {
+        int currentFloor = elevator.getCurrentFloor();
+        if (elevator.getDirection() == Direction.UP) {
+          List<Request> upRequestsForElevator =
+              getRequestsNew(this.upRequests, currentFloor, Direction.UP);
+          elevator.processRequests(upRequestsForElevator);
+        } else if (elevator.getDirection() == Direction.DOWN) {
+          List<Request> downRequestsForElevator =
+              getRequestsNew(this.downRequests, currentFloor, Direction.DOWN);
+          elevator.processRequests(downRequestsForElevator);
+        }
       }
 
+
     }
+  }
+
+  /**
+   * This method is used to get the requests for the elevators.
+   *
+   * @param requests the requests to get the requests from.
+   * @return the requests to return.
+   */
+  private List<Request> getRequestsNew(List<Request> requests,
+                                       int currentFloor,
+                                       Direction direction) {
+    // if the elevator is going up then we want to get the requests that are above the current floor.
+    List<Request> requestsToReturn = new ArrayList<Request>();
+    if (direction == Direction.UP) {
+
+      Iterator<Request> iterator = requests.iterator();
+      while (iterator.hasNext()) {
+        Request request = iterator.next();
+        if (request.getStartFloor() >= currentFloor) {
+          requestsToReturn.add(request);
+          iterator.remove();
+        }
+      }
+    } else {
+      Iterator<Request> iterator = requests.iterator();
+      while (iterator.hasNext()) {
+        Request request = iterator.next();
+        if (request.getStartFloor() <= currentFloor) {
+          requestsToReturn.add(request);
+          iterator.remove();
+        }
+      }
+    }
+
+
+    return requestsToReturn;
   }
 
   /**
@@ -288,6 +328,7 @@ public class Building implements BuildingInterface {
     }
     return requestsToReturn;
   }
+
 
 }
 

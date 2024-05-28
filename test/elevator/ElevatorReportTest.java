@@ -1,14 +1,27 @@
 package elevator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import building.enums.Direction;
 import org.junit.Before;
 import org.junit.Test;
-import building.enums.Direction;
 
+
+/**
+ * This class is used to test the ElevatorReport class.
+ */
 public class ElevatorReportTest {
 
   ElevatorReport report;
 
+
+  /**
+   * This method is used to set up the tests.
+   */
   @Before
   public void setUp() {
     report = new ElevatorReport(
@@ -16,7 +29,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -41,7 +54,7 @@ public class ElevatorReportTest {
 
   @Test
   public void getFloorRequests() {
-    assertArrayEquals(new boolean[]{false, true, true}, report.getFloorRequests());
+    assertArrayEquals(new boolean[] {false, true, true}, report.getFloorRequests());
   }
 
   @Test
@@ -88,7 +101,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -102,7 +115,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -116,7 +129,7 @@ public class ElevatorReportTest {
         2,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -130,7 +143,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.UP, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -144,7 +157,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         false,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -158,7 +171,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{true, true, true},  // floorRequests
+        new boolean[] {true, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -172,7 +185,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         1,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -186,7 +199,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         1,  // endWaitTimer
         false,  // outOfService
@@ -200,7 +213,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         true,  // outOfService
@@ -214,7 +227,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService
@@ -231,7 +244,7 @@ public class ElevatorReportTest {
         1,  // currentFloor
         Direction.STOPPED, // direction
         true,  // doorClosed
-        new boolean[]{false, true, true},  // floorRequests
+        new boolean[] {false, true, true},  // floorRequests
         0,  // doorOpenTimer
         0,  // endWaitTimer
         false,  // outOfService

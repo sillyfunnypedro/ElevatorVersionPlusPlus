@@ -1,15 +1,15 @@
 package display;
 
+
+import building.BuildingReport;
 import building.handlers.RequestHandler;
 import building.handlers.StartElevatorSystemHandler;
 import building.handlers.StepHandler;
 import building.handlers.StopElevatorSystemHandler;
 import building.handlers.UpdateHandler;
-import building.BuildingReport;
-
+import java.util.Scanner;
 import scanerzus.Request;
 
-import java.util.Scanner;
 
 /**
  * This class is used to display the building information in the console.
@@ -57,6 +57,16 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   }
 
   /**
+   * This method is used to set the step listener.
+   *
+   * @param stepHandler the step handler
+   */
+  @Override
+  public void setStepListener(StepHandler stepHandler) {
+    this.stepHandler = stepHandler;
+  }
+
+  /**
    * This method is used to set the start listener.
    *
    * @param startHandler the start handler
@@ -75,17 +85,6 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
   public void setStopListener(StopElevatorSystemHandler stopHandler) {
     this.stopHandler = stopHandler;
   }
-
-  /**
-   * This method is used to set the step listener.
-   *
-   * @param stepHandler the step handler
-   */
-  @Override
-  public void setStepListener(StepHandler stepHandler) {
-    this.stepHandler = stepHandler;
-  }
-
 
   /**
    * This method is used to start the building display.
@@ -206,6 +205,105 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
 
   }
 
+  private void updateDisplay() {
+    if (this.updateHandler != null) {
+      BuildingReport buildingStatus = this.updateHandler.handleRequest();
+
+      String buildingDisplay = new AsciiBuildingDisplay().display(buildingStatus);
+
+      System.out.println(buildingDisplay);
+    }
+  }
+
+  /**
+   * This method is used to display the prompt to the user.
+   */
+  public void displayPrompt() {
+    System.out.print("[s steps] Run steps times [CR] one step\n"
+        + "[r start end] make a request \n"
+        + "[t requests] generate random requests\n"
+        + "[h] halt building [c] continue building [q] quit > ");
+  }
+
+  /**
+   * Get the input from the user, validate it and return it.
+   *
+   * @param scanner the scanner to get the input from.
+   * @return array of valid inputs from the user.
+   */
+  public String[] getInput(Scanner scanner) {
+    String input = scanner.nextLine();
+    if (input.isEmpty()) {
+      System.out.println("The elevators will all execute a step");
+      return new String[] {"s", "1"};
+    }
+    // check the first character of the input
+    char firstChar = input.charAt(0);
+    String[] tokens;
+    switch (firstChar) {
+      case 's':
+        tokens = input.split(" ");
+        if (tokens.length == 1) {
+          return new String[] {"s", "1"};
+        } else {
+
+          try {
+            int steps = Integer.parseInt(tokens[1]);
+            return new String[] {"s", Integer.toString(steps)};
+          } catch (NumberFormatException e) {
+            System.out.println("Invalid input");
+            System.out.println("The elevators will all execute a step");
+            return new String[] {"s", "1"};
+          }
+        }
+
+
+      case 'r':
+        tokens = input.split(" ");
+        if (tokens.length != 3) {
+          System.out.println("Invalid input");
+          return new String[] {"invalid"};
+        } else {
+          try {
+            int fromFloor = Integer.parseInt(tokens[1]);
+            int toFloor = Integer.parseInt(tokens[2]);
+            return new String[] {"r", Integer.toString(fromFloor), Integer.toString(toFloor)};
+          } catch (NumberFormatException e) {
+            System.out.println("Invalid input");
+            System.out.println("The elevators will all execute a step");
+            return new String[] {"s", "1"};
+          }
+        }
+      case 't':
+        tokens = input.split(" ");
+        if (tokens.length == 1) {
+          return new String[] {"t", "1"};
+        } else {
+          // we will try to get the number.
+          // if it is not a number we will default to 1
+          try {
+            int requests = Integer.parseInt(tokens[1]);
+            return new String[] {"t", Integer.toString(requests)};
+          } catch (NumberFormatException e) {
+            return new String[] {"t", "1"};
+          }
+        }
+
+      case 'h':
+        return new String[] {"h"};
+
+      case 'c':
+        return new String[] {"c"};
+
+      case 'q':
+        return new String[] {"q"};
+
+      default:
+        System.out.println("Invalid input");
+        System.out.println("The elevators will all execute a step");
+        return new String[] {"s", "1"};
+    }
+  }
 
   private void runStep(int steps) {
     if (steps > 1000) {
@@ -231,104 +329,6 @@ public class ConsoleBuildingDisplay implements BuildingDisplayInterface {
         }
       }
     }
-  }
-
-  private void updateDisplay() {
-    if (this.updateHandler != null) {
-      BuildingReport buildingStatus = this.updateHandler.handleRequest();
-
-      String buildingDisplay = new AsciiBuildingDisplay().display(buildingStatus);
-
-      System.out.println(buildingDisplay);
-    }
-  }
-
-  /**
-   * Get the input from the user, validate it and return it.
-   *
-   * @param scanner the scanner to get the input from.
-   * @return array of valid inputs from the user.
-   */
-  public String[] getInput(Scanner scanner) {
-    String input = scanner.nextLine();
-    if (input.isEmpty()) {
-      System.out.println("The elevators will all execute a step");
-      return new String[]{"s", "1"};
-    }
-    // check the first character of the input
-    char firstChar = input.charAt(0);
-    String[] tokens;
-    switch (firstChar) {
-      case 's':
-        tokens = input.split(" ");
-        if (tokens.length == 1) {
-          return new String[]{"s", "1"};
-        } else {
-
-          try {
-            int steps = Integer.parseInt(tokens[1]);
-            return new String[]{"s", Integer.toString(steps)};
-          } catch (NumberFormatException e) {
-            System.out.println("Invalid input");
-            System.out.println("The elevators will all execute a step");
-            return new String[]{"s", "1"};
-          }
-        }
-
-
-      case 'r':
-        tokens = input.split(" ");
-        if (tokens.length != 3) {
-          System.out.println("Invalid input");
-          return new String[]{"invalid"};
-        } else {
-          try {
-            int fromFloor = Integer.parseInt(tokens[1]);
-            int toFloor = Integer.parseInt(tokens[2]);
-            return new String[]{"r", Integer.toString(fromFloor), Integer.toString(toFloor)};
-          } catch (NumberFormatException e) {
-            System.out.println("Invalid input");
-            System.out.println("The elevators will all execute a step");
-            return new String[]{"s", "1"};
-          }
-        }
-      case 't':
-        tokens = input.split(" ");
-        if (tokens.length == 1) {
-          return new String[]{"t", "1"};
-        } else {
-          // we will try to get the number.
-          // if it is not a number we will default to 1
-          try {
-            int requests = Integer.parseInt(tokens[1]);
-            return new String[]{"t", Integer.toString(requests)};
-          } catch (NumberFormatException e) {
-            return new String[]{"t", "1"};
-          }
-        }
-
-      case 'h':
-        return new String[]{"h"};
-
-      case 'c':
-        return new String[]{"c"};
-
-      case 'q':
-        return new String[]{"q"};
-
-      default:
-        System.out.println("Invalid input");
-        System.out.println("The elevators will all execute a step");
-        return new String[]{"s", "1"};
-    }
-  }
-
-
-  public void displayPrompt() {
-    System.out.print("[s steps] Run steps times [CR] one step\n"
-        + "[r start end] make a request \n"
-        + "[t requests] generate random requests\n"
-        + "[h] halt building [c] continue building [q] quit > ");
   }
 
 
