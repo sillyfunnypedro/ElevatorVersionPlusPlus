@@ -1,6 +1,6 @@
 package building;
 
-Maimport building.enums.Direction;
+import building.enums.Direction;
 import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
 import elevator.ElevatorInterface;
