@@ -19,22 +19,19 @@ public class ElevatorReport {
 
   private final boolean isTakingRequests;
 
-  private final int outstandingRequests;
-
 
   /**
    * This constructor is used to create a new ElevatorReport object.
    *
-   * @param elevatorId          The id of the elevator.
-   * @param currentFloor        The current floor of the elevator.
-   * @param doorClosed          The status of the door.
-   * @param floorRequests       The requests for the floors.
-   * @param direction           The direction of the elevator.
-   * @param doorOpenTimer       The timer for the door.
-   * @param endWaitTimer        The timer for the end of the run.
-   * @param outOfService        The status of the elevator.
-   * @param isTakingRequests    Is the elevator taking requests.
-   * @param outstandingRequests The number of outstanding requests.
+   * @param elevatorId       The id of the elevator.
+   * @param currentFloor     The current floor of the elevator.
+   * @param doorClosed       The status of the door.
+   * @param floorRequests    The requests for the floors.
+   * @param direction        The direction of the elevator.
+   * @param doorOpenTimer    The timer for the door.
+   * @param endWaitTimer     The timer for the end of the run.
+   * @param outOfService     The status of the elevator.
+   * @param isTakingRequests Is the elevator taking requests.
    */
   public ElevatorReport(int elevatorId,
                         int currentFloor,
@@ -45,8 +42,7 @@ public class ElevatorReport {
                         int doorOpenTimer,
                         int endWaitTimer,
                         boolean outOfService,
-                        boolean isTakingRequests,
-                        int outstandingRequests) {
+                        boolean isTakingRequests) {
     this.elevatorId = elevatorId;
     this.currentFloor = currentFloor;
     this.doorClosed = doorClosed;
@@ -56,7 +52,6 @@ public class ElevatorReport {
     this.endWaitTimer = endWaitTimer;
     this.outOfService = outOfService;
     this.isTakingRequests = isTakingRequests;
-    this.outstandingRequests = outstandingRequests;
   }
 
 
@@ -247,8 +242,6 @@ public class ElevatorReport {
         sb.append(" --");
       }
     }
-
-    sb.append(String.format("[ %d]", this.outstandingRequests));
     sb.append(">");
 
     return sb.toString();
