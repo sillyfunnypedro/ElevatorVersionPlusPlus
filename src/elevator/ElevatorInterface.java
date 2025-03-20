@@ -107,8 +107,6 @@ public interface ElevatorInterface {
    */
   boolean isTakingRequests();
 
-  int getCurrentCapacity();
-
   /**
    * This method is used to get the elevator status ElevatorReport.
    *
