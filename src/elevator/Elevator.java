@@ -2,9 +2,9 @@ package elevator;
 
 
 import building.enums.Direction;
-import java.util.ArrayList;
 import java.util.List;
 import scanerzus.Request;
+
 
 /**
  * An implementation of the ElevatorStatus interface.
@@ -70,20 +70,16 @@ public class Elevator implements ElevatorInterface {
   private int stopWaitTimeLeft = 0;
   private boolean outOfService;  // start must be issued on the elevator to start it.
 
-  /************************************************************************
-   * A store for the current requests.
-   ************************************************************************/
-  private List<Request> currentRequests;
 
   /**
    * The constructor for this elevator.
    * The elevator is initially at the ground floor and is not moving.
    *
    * @param maxFloor     the total number of floors in the building
-   *                     must be greater than 2
+   *                     must be greater than 0
    *                     must be less than 30 (city bylaws)
    * @param maxOccupancy the maximum number of people that can fit in the elevator
-   *                     must be greater than 2
+   *                     must be greater than 0
    *                     must be less than 20 (fire code)
    * @throws IllegalArgumentException if the maxFloor or maxOccupancy is out of range
    */
@@ -102,7 +98,6 @@ public class Elevator implements ElevatorInterface {
     this.outOfService = true;
     this.floorRequests = new boolean[maxFloor];
     this.takingRequests = false;
-    this.currentRequests = new ArrayList<>();
 
   }
 
@@ -193,7 +188,7 @@ public class Elevator implements ElevatorInterface {
 
   /**
    * Start the elevator.  This does nothing if the elevator is not
-   * on the first floor and its doors are open.
+   * on the ground floor and its doors are open.
    */
   @Override
   public void start() {
@@ -208,7 +203,6 @@ public class Elevator implements ElevatorInterface {
 
   /**
    * Take the elevator out of service.
-   * video
    */
   @Override
   public void takeOutOfService() {
@@ -302,101 +296,6 @@ public class Elevator implements ElevatorInterface {
   }
 
   /**
-   * Process the requests.  The Building will only give us requests
-   * that are on the way to our current direction.  That is,
-   * if we are at the bottom or the top.
-   * If a request is received to processRequests and the elevator
-   * is not on the first floor or the top floor then and exception
-   * will be thrown.
-   */
-  @Override
-  public void processRequests(List<Request> requests) throws IllegalStateException {
-    if (this.currentFloor != 0 && this.currentFloor != this.maxFloor - 1) {
-      throw new IllegalStateException("Elevator cannot process requests "
-          + "unless it is at the bottom or top floor.");
-    }
-
-    if (requests.isEmpty()) {
-      return;
-    }
-
-    this.processStopRequests(requests);
-    // copy the requests to the currentRequests
-    this.currentRequests = requests;
-
-    if (this.currentFloor == 0) {
-      this.direction = Direction.UP;
-    } else if (this.currentFloor == this.maxFloor - 1) {
-      this.direction = Direction.DOWN;
-    }
-    this.takingRequests = false;
-
-  }
-
-  /**
-   * isTakingRequests.
-   * This will return true if the elevator is taking requests.
-   *
-   * @return true if the elevator is taking requests, false otherwise.
-   */
-  @Override
-  public boolean isTakingRequests() {
-    return this.takingRequests;
-  }
-
-
-  /**
-   * getCurrentCapacity
-   * This will return the current capacity of the elevator.
-   * this is the total capacity of the elevator minus the outstanding requests
-   */
-  @Override
-  public int getCurrentCapacity() {
-    return this.maxOccupancy - this.currentRequests.size();
-  }
-
-  /**
-   * Generate a report for the elevator in ElevatorReport format.
-   *
-   * @return an ElevatorReport object.
-   */
-  @Override
-  public ElevatorReport getElevatorStatus() {
-    return new ElevatorReport(
-        this.id,
-        this.currentFloor,
-        this.direction,
-        this.doorClosed,
-        this.floorRequests,
-        this.doorOpenTimeLeft,
-        this.stopWaitTimeLeft,
-        this.outOfService,
-        this.takingRequests,
-        this.currentRequests.size());
-  }
-
-  private void processStopRequests(List<Request> requests) {
-    clearStopRequests();
-
-    for (Request request : requests) {
-      this.floorRequests[request.getStartFloor()] = true;
-      this.floorRequests[request.getEndFloor()] = true;
-    }
-    // if the elevator was waiting at the top or bottom
-    // set the timer to 0 and we are off to the races.
-    this.stopWaitTimeLeft = 0;
-  }
-
-  /**
-   * Clear the Floor Requests.
-   */
-  private void clearStopRequests() {
-    for (int i = 0; i < this.maxFloor; i++) {
-      this.floorRequests[i] = false;
-    }
-  }
-
-  /**
    * Step the elevator when out of service.
    * If the elevator is on the ground floor and the door is open return
    * If the elevator is on the ground floor and the door is closed
@@ -438,7 +337,6 @@ public class Elevator implements ElevatorInterface {
    * Process the door open step function.
    */
   private void stepDoorOpen() {
-    this.updateCurrentRequests();
     this.doorOpenTimeLeft--;
     if (this.doorOpenTimeLeft == 0) {
       this.doorClosed = true;
@@ -460,14 +358,84 @@ public class Elevator implements ElevatorInterface {
     }
   }
 
-  private void updateCurrentRequests() {
-    List<Request> newRequests = new ArrayList<>();
-    for (Request request : this.currentRequests) {
-      if (request.getEndFloor() != this.currentFloor) {
-        newRequests.add(request);
-      }
+  /**
+   * Process the requests.  The Building will only give us requests
+   * that are on the way to our current direction.  That is,
+   * if we are at the bottom or the top.
+   * If a request is received to processRequests and the elevator
+   * is not on the first floor or the top floor then and exception
+   * will be thrown.
+   */
+  @Override
+  public void processRequests(List<Request> requests) throws IllegalStateException {
+    if (this.currentFloor != 0 && this.currentFloor != this.maxFloor - 1) {
+      throw new IllegalStateException("Elevator cannot process requests "
+          + "unless it is at the bottom or top floor.");
     }
-    this.currentRequests = newRequests;
+
+    if (requests.isEmpty()) {
+      return;
+    }
+
+    this.processStopRequests(requests);
+    if (this.currentFloor == 0) {
+      this.direction = Direction.UP;
+    } else if (this.currentFloor == this.maxFloor - 1) {
+      this.direction = Direction.DOWN;
+    }
+    this.takingRequests = false;
+
+  }
+
+  /**
+   * isTakingRequests.
+   * This will return true if the elevator is taking requests.
+   *
+   * @return true if the elevator is taking requests, false otherwise.
+   */
+  @Override
+  public boolean isTakingRequests() {
+    return this.takingRequests;
+  }
+
+  /**
+   * Generate a report for the elevator in ElevatorReport format.
+   *
+   * @return an ElevatorReport object.
+   */
+  @Override
+  public ElevatorReport getElevatorStatus() {
+    return new ElevatorReport(
+        this.id,
+        this.currentFloor,
+        this.direction,
+        this.doorClosed,
+        this.floorRequests,
+        this.doorOpenTimeLeft,
+        this.stopWaitTimeLeft,
+        this.outOfService,
+        this.takingRequests);
+  }
+
+  private void processStopRequests(List<Request> requests) {
+    clearStopRequests();
+
+    for (Request request : requests) {
+      this.floorRequests[request.getStartFloor()] = true;
+      this.floorRequests[request.getEndFloor()] = true;
+    }
+    // if the elevator was waiting at the top or bottom
+    // set the timer to 0 and we are off to the races.
+    this.stopWaitTimeLeft = 0;
+  }
+
+  /**
+   * Clear the Floor Requests.
+   */
+  private void clearStopRequests() {
+    for (int i = 0; i < this.maxFloor; i++) {
+      this.floorRequests[i] = false;
+    }
   }
 
   /**
@@ -486,8 +454,7 @@ public class Elevator implements ElevatorInterface {
         this.doorOpenTimeLeft,
         this.stopWaitTimeLeft,
         this.outOfService,
-        this.takingRequests,
-        this.currentRequests.size());
+        this.takingRequests);
 
     return report.toString();
   }
