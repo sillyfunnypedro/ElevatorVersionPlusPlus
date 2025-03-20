@@ -1,12 +1,10 @@
 package building;
 
-import building.enums.Direction;
 import building.enums.ElevatorSystemStatus;
 import elevator.Elevator;
 import elevator.ElevatorInterface;
 import elevator.ElevatorReport;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import scanerzus.Request;
 
@@ -258,61 +256,18 @@ public class Building implements BuildingInterface {
     // add upRequests up to the capacity of the elevator.
     // if the elevator is on the top floor add downRequests up to the capacity of the elevator.
     for (ElevatorInterface elevator : this.elevators) {
-//      if (!elevator.isTakingRequests()) {
-//        continue;
-//      }
-
-      if (elevator.getCurrentCapacity() > 0) {
-        int currentFloor = elevator.getCurrentFloor();
-        if (elevator.getDirection() == Direction.UP) {
-          List<Request> upRequestsForElevator =
-              getRequestsNew(this.upRequests, currentFloor, Direction.UP);
-          elevator.processRequests(upRequestsForElevator);
-        } else if (elevator.getDirection() == Direction.DOWN) {
-          List<Request> downRequestsForElevator =
-              getRequestsNew(this.downRequests, currentFloor, Direction.DOWN);
-          elevator.processRequests(downRequestsForElevator);
-        }
+      if (!elevator.isTakingRequests()) {
+        continue;
       }
-
+      if (elevator.getCurrentFloor() == 0) {
+        List<Request> upRequestsForElevator = getRequests(this.upRequests);
+        elevator.processRequests(upRequestsForElevator);
+      } else if (elevator.getCurrentFloor() == this.numberOfFloors - 1) {
+        List<Request> downRequestsForElevator = getRequests(this.downRequests);
+        elevator.processRequests(downRequestsForElevator);
+      }
 
     }
-  }
-
-  /**
-   * This method is used to get the requests for the elevators.
-   *
-   * @param requests the requests to get the requests from.
-   * @return the requests to return.
-   */
-  private List<Request> getRequestsNew(List<Request> requests,
-                                       int currentFloor,
-                                       Direction direction) {
-    // if the elevator is going up then we want to get the requests that are above the current floor.
-    List<Request> requestsToReturn = new ArrayList<Request>();
-    if (direction == Direction.UP) {
-
-      Iterator<Request> iterator = requests.iterator();
-      while (iterator.hasNext()) {
-        Request request = iterator.next();
-        if (request.getStartFloor() >= currentFloor) {
-          requestsToReturn.add(request);
-          iterator.remove();
-        }
-      }
-    } else {
-      Iterator<Request> iterator = requests.iterator();
-      while (iterator.hasNext()) {
-        Request request = iterator.next();
-        if (request.getStartFloor() <= currentFloor) {
-          requestsToReturn.add(request);
-          iterator.remove();
-        }
-      }
-    }
-
-
-    return requestsToReturn;
   }
 
   /**
@@ -328,7 +283,6 @@ public class Building implements BuildingInterface {
     }
     return requestsToReturn;
   }
-
 
 }
 
